@@ -1,0 +1,470 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>安卓开发学习笔记6-Android应用四大组件之Service | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">安卓开发学习笔记6-Android应用四大组件之Service</h1>
+
+    <h4 id="service-androidserviceandroidandroidbindservice"><strong>Service</strong> 是Android应用程序中用来执行较长时间操作的没有用户界面的后台组件。Service组件实例可以被其他Android应用程序组件实例启动，并在用户切换到其他应用程序后仍然在后台运行。另外，其他Android应用程序组件实例可以bind到一个Service实例进行数据交互，甚至进行进程间的通信。</h4>
+
+<h4 id="service">一个Service组件实例主要有下面两种形式：</h4>
+<ol>
+  <li><strong>Started</strong> - 一个Service实例被其他组件实例通过startService()方法启动后，就认为其处于 <strong>Started</strong> 状态。此时该Service组件实例可以在启动它的其他组件实例被销毁后继续在后台运行。一般情况下，Service实例用于执行某个特定操作，不需要返回数据。</li>
+  <li><strong>Bound</strong> - 一个Service实例被其他组件实例通过 bindService() 方法激活后，就认为其处于 <strong>Bound</strong> 状态。此时该Service提供一个C/S接口来和其他组件实例进行数据交互，此时甚至可以进行进程间的通信。处于 <strong>Bound</strong> 状态的 Service 实例在bind到它的所有其他组件实例结束 bind 后被销毁。</li>
+</ol>
+
+<h4 id="service-started--bound-overrideserviceonstartcommandserviceonbindbindserviceservicecpuserviceanr">Service实例可以同时处于 <strong>Started</strong> 和 <strong>Bound</strong> 状态，这个取决于override了那些Service类型的回调函数。通过实现onStartCommand()允许其他组件实例启动该Service，而实现onBind()可以允许其他组件实例对其实例进行bind。默认情况下，Service实例运行在主进程的主线程中，所以如果该Service需要执行CPU密集型或者较长时间的操作，最好在Service实例中新建一个线程来执行操作，从而降低出现ANR的几率，避免影响到用户体验。</h4>
+
+<h4 id="serviceservice">一般情况下，由于一个Service实例可以在启动它的组件被销毁后仍然运行在后台，所以当有这种业务需求时，Service是个好选择，否则可以使用线程。</h4>
+
+<h3 id="service-1">创建Service</h3>
+
+<ul>
+  <li>通过在Java代码中定义一个Service类型的子类就可以创建一个自定义的Service。这个Service的子类可以通过override Service类型的回调方法来实现Activity在自己生命周期中状态变化时执行的操作。其中最重要的四个回调函数为：
+    <ol>
+      <li>onStartCommand() - Android系统会在其他应用程序组件实例通过startService()方法启动一个Service实例的时候调用onStartCommand()方法，在执行完操作后，调用stopSelf()方法结束自己，或者在调用它的其他组件实例中调用startService()方法来结束它。如果该service被设计为会被其他组件实例bind，那么可以不用实现onStartCommand()方法。</li>
+      <li>onBind() - Android系统会在其他应用程序组件实例通过bindService()方法启动一个Service实例的时候调用onBind()方法。在该方法中，一个可以和其他组件实例通信的IBinder接口必须被返回，如果不希望该Service被bind，则返回null，但onBind()方法都必须被实现。</li>
+      <li>onCreate() - Android系统在Service实例被创建的时候调用该方法，在方法体中，会调用onStartCommand()或者onBind()方法，如果Service实例已经存在，则onCreate()不会被再次执行。</li>
+      <li>onDestroy() - Android系统在销毁Service实例的时候调用该方法。在该方法中，Service运行过程中申请的资源应该被正确地释放，这是一个Service最后一个被调用的方法。</li>
+    </ol>
+  </li>
+</ul>
+
+<h4 id="androidserviceserviceintentandroid">由于Android系统在资源紧张的时候会强制结束一些Service实例，所以在这种情况发生后，是否需要重启该Service，重启后是否需要继续处理Intent需要根据业务需求来确定。Android提供了相关机制，文本后面会讨论到。</h4>
+
+<h3 id="service-2">声明Service</h3>
+
+<h4 id="androidservicemanifest1">所有Android应用程序中用到的Service都需要在应用的manifest文件中声明，<a href="http://developer.android.com/guide/components/services.html">官网给出了格式</a>:</h4>
+
+<div class="highlight"><pre><code class="xml"><span class="nt">&lt;manifest</span> <span class="err">...</span> <span class="nt">&gt;</span>
+  ...
+  <span class="nt">&lt;application</span> <span class="err">...</span> <span class="nt">&gt;</span>
+      <span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">&quot;.ExampleService&quot;</span> <span class="nt">/&gt;</span>
+      ...
+  <span class="nt">&lt;/application&gt;</span>
+<span class="nt">&lt;/manifest&gt;</span></code></pre></div>
+
+<h4 id="serviceintent-filter">Service元素可以有很多属性，下面实际应用中的例子中有个intent-filter：</h4>
+
+<div class="highlight"><pre><code class="xml"><span class="nt">&lt;service</span> <span class="na">android:name=</span><span class="s">&quot;.ServiceB&quot;</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;intent-filter</span> <span class="nt">&gt;</span>
+                <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;com.xhrwang.servicedemo.actionB&quot;</span><span class="nt">/&gt;</span>
+            <span class="nt">&lt;/intent-filter&gt;</span>
+        <span class="nt">&lt;/service&gt;</span></code></pre></div>
+
+<h4 id="android">关于如何平衡Android应用程序的安全和应用所提供功能的要求，官网给出了一些建议：</h4>
+
+<blockquote>
+  <p>To ensure your app is secure, always use an explicit intent when starting or binding your Service and do not declare intent filters for the service. If it’s critical that you allow for some amount of ambiguity as to which service starts, you can supply intent filters for your services and exclude the component name from the Intent, but you then must set the package for the intent with setPackage(), which provides sufficient disambiguation for the target service.</p>
+</blockquote>
+
+<blockquote>
+  <p>Additionally, you can ensure that your service is available to only your app by including the android:exported attribute and setting it to “false”. This effectively stops other apps from starting your service, even when using an explicit intent.</p>
+</blockquote>
+
+<h3 id="started--service">“ <strong>Started</strong> ” Service</h3>
+
+<h4 id="androidstartserviceserviceandroidonstartcommandserviceservicestopselfstopserviceservice">Android应用程序的其他组件实例可以通过startService()方法启动一个Service实例，这时Android系统会调用onStartCommand()方法。该Service实例甚至可以在启动它的其他组件实例被销毁后继续在后台运行，在完成特定操作后，该Service实例可以调用stopSelf()方法自己退出，其他组件实例也可以通过调用stopService()方法主动退出该Service实例。</h4>
+
+<h4 id="service-3">一般情况下，下面两种类型的Service可以按这种方式启动：</h4>
+<ol>
+  <li><strong>Service</strong> - 这是Service的基类，当我们自己创建一个继承自它的Service类型后，需要新建一个线程来执行操作，否则该Service的实例在主进程的主线程中运行可能会造成应用程序ANR，影响用户体验。<a href="http://developer.android.com/guide/components/services.html">官网提供了一个使用该类型的例子</a>，这个例子显示了如何手动进行多线程处理每个请求。这里有两点需要注意的：
+    <ul>
+      <li>在Service实例完成所有工作后，需要自己调用 stopSelf() 方法退出或者在其他组件实例中调用 stopService() 退出该Service实例。</li>
+      <li>onStartCommand() 方法需要返回一个int类型的对象，这个整型数值告诉Android系统当该Service实例在资源紧张的时候被系统杀掉之后如何继续，其取值情况分为：
+        <ol>
+          <li>START_NOT_STICKY - 当系统在 onStartCommand() 方法执行完后杀掉了Service实例，如果没有等待处理的传递给该Service的Intent，系统不需要重启该Service实例。</li>
+          <li>START_STICKY - 当系统在 onStartCommand() 方法执行完后杀掉了Service实例，重启该Service实例，并调用 onStartCommand() 方法，并传递待处理的Intent对象，如果有的话，否则传递一个空Intent对象，不自动重发最近一次的Intent对象。</li>
+          <li>START_REDELIVER_INTENT - 类似于 START_STICKY ，区别在于会在调用 onStartCommand() 方法的时候自动传递最近的一次发给该Service的Intent对象。</li>
+        </ol>
+      </li>
+    </ul>
+  </li>
+  <li><strong>IntentService</strong> - 继承自Service类型，该类型有一个单独的worker线程依次处理每个请求的操作。当发给Service的请求不需要并行处理时，可以使用该类型，我们可以实现 onHandleIntent() 方法来处理每个请求。具体的运行情况如下：
+    <ul>
+      <li>启动一个单独的worker线程处理所有传递过来的Intent对象。</li>
+      <li>提供一个默认的 onStartCommand() 方法中为所有Intent对象创建一个工作队列，依次将它们传递给 onHandleIntent() 方法执行。</li>
+      <li>在所有Intent对象被处理完毕后调用 stopSelf() 方法自己退出，我们不需要自己去关心该Service实例的生命周期。</li>
+      <li>提供一个默认的 onBind() 方法并返回null。</li>
+    </ul>
+  </li>
+</ol>
+
+<p>所以我们唯一需要做的就是实现 onHandleIntent() 方法。<a href="http://developer.android.com/guide/components/services.html">官网提供了一个例子</a>:</p>
+
+<div class="highlight"><pre><code class="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloIntentService</span> <span class="kd">extends</span> <span class="n">IntentService</span> <span class="o">{</span>
+
+  <span class="cm">/**</span>
+<span class="cm">   * A constructor is required, and must call the super IntentService(String)</span>
+<span class="cm">   * constructor with a name for the worker thread.</span>
+<span class="cm">   */</span>
+  <span class="kd">public</span> <span class="nf">HelloIntentService</span><span class="o">()</span> <span class="o">{</span>
+      <span class="kd">super</span><span class="o">(</span><span class="s">&quot;HelloIntentService&quot;</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="cm">/**</span>
+<span class="cm">   * The IntentService calls this method from the default worker thread with</span>
+<span class="cm">   * the intent that started the service. When this method returns, IntentService</span>
+<span class="cm">   * stops the service, as appropriate.</span>
+<span class="cm">   */</span>
+  <span class="nd">@Override</span>
+  <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onHandleIntent</span><span class="o">(</span><span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+      <span class="c1">// Normally we would do some work here, like download a file.</span>
+      <span class="c1">// For our sample, we just sleep for 5 seconds.</span>
+      <span class="kt">long</span> <span class="n">endTime</span> <span class="o">=</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">+</span> <span class="mi">5</span><span class="o">*</span><span class="mi">1000</span><span class="o">;</span>
+      <span class="k">while</span> <span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()</span> <span class="o">&lt;</span> <span class="n">endTime</span><span class="o">)</span> <span class="o">{</span>
+          <span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+              <span class="k">try</span> <span class="o">{</span>
+                  <span class="n">wait</span><span class="o">(</span><span class="n">endTime</span> <span class="o">-</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">());</span>
+              <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+              <span class="o">}</span>
+          <span class="o">}</span>
+      <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
+
+<h3 id="bound-service">“<strong>Bound</strong>” Service</h3>
+
+<h4 id="android-bindservice-service-bound-serviceservice-onstartcommand---startservice-service">如同前面提到的，其他Android应用程序组件实例通过 bindService() 方法激活的Service实例就是 Bound Service，以建立一个同该Service实例的长连接进行数据交互。一般情况下，这种情况下我们不会实现 onStartCommand() 方法，也不允许其他组件实例通过  startService() 方法启动该Service实例。</h4>
+
+<h4 id="onbind-ibindservice-bindservice-ibindservicebindservicebindandroidserviceservice">这种情况下，我们需要实现 onBind() 方法并返回一个IBind对象，该对象定义了和该Service实例进行通信的接口，其他组件实例可以通过 bindService() 方法来获得该IBind对象并调用该Service提供的方法。当所有bind到该Service实例的其他组件实例都结束bind之后，Android系统会销毁该Service实例，我们不需要主动去停止该Service实例。</h4>
+
+<h3 id="section">给用户发通知</h3>
+
+<h4 id="service-toast-notifications--status-bar-notifications-">正在运行的Service实例可以通过 Toast Notifications 和 Status Bar Notifications 来发通知给用户：</h4>
+<ol>
+  <li><strong>Toast Notifications</strong> - 一个出现在当前窗口最顶层的消息窗口，在呈现指定时间后自动消失。</li>
+  <li><strong>Status Bar Notifications</strong> - 在状态通知栏显示一条由icon和消息组成的通知，用户点击后可以执行一个Action，比如启动一个Activity。</li>
+</ol>
+
+<h3 id="section-1">前台服务</h3>
+
+<h4 id="section-2">前台服务被认为是和用户当前操作相关的正在运行的服务，该服务即使在资源紧张的时候也不会被系统杀掉，而且必须在状态通知栏放置一条通知。该通知无法被取消，直到该服务被停止后者该服务不再是前台服务。</h4>
+
+<h4 id="section-3">可以通过下面的方式启动一个前台服务：</h4>
+
+<div class="highlight"><pre><code class="java"><span class="n">Notification</span> <span class="n">notification</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Notification</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">drawable</span><span class="o">.</span><span class="na">icon</span><span class="o">,</span> <span class="n">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">ticker_text</span><span class="o">),</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">());</span>
+<span class="n">Intent</span> <span class="n">notificationIntent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">ExampleActivity</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="n">PendingIntent</span> <span class="n">pendingIntent</span> <span class="o">=</span> <span class="n">PendingIntent</span><span class="o">.</span><span class="na">getActivity</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">notificationIntent</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+<span class="n">notification</span><span class="o">.</span><span class="na">setLatestEventInfo</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">notification_title</span><span class="o">),</span>
+        <span class="n">getText</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">string</span><span class="o">.</span><span class="na">notification_message</span><span class="o">),</span> <span class="n">pendingIntent</span><span class="o">);</span>
+<span class="n">startForeground</span><span class="o">(</span><span class="n">ONGOING_NOTIFICATION_ID</span><span class="o">,</span> <span class="n">notification</span><span class="o">);</span></code></pre></div>
+
+<h3 id="service-4">Service的生命周期</h3>
+
+<h4 id="service-5">Service的生命周期示意图：</h4>
+<p><img src="/images/service_lifecycle.png" alt="" /></p>
+
+<h4 id="started-service--bound-service-serviceservice-oncreate--ondestroy--started-service--active--onstartcommand--ondestroy--bound-service-active--onbind--onunbind-">本文前面已经详细说明了 Started Service 和 Bound Service 在使用的时候调用Service类型回调函数的情况，这里就不多说了，需要注意的是Service的完整生命周期从 onCreate() 方法被调用开始，到 onDestroy() 方法被调用结束。 Started Service 的 active 生命期从 onStartCommand() 被调用开始，到 onDestroy() 被调用结束，而 Bound Service，其 active 生命期从 onBind() 被调用开始，到 onUnbind() 被调用结束。</h4>
+
+<h4 id="activity-demoservicedemo2">参考官网Activity Demo而写的<a href="https://github.com/xhrwang/AndroidServiceDemo">关于Service的Demo</a></h4>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity">安卓开发学习笔记5-Android应用四大组件之Activity&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider">&larr; 安卓开发学习笔记7-Android应用四大组件之ContentProvider</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="nofollow">安卓开发学习笔记6-Android应用四大组件之Service</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>07 July 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Android-ref">Android <span>9</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

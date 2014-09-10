@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>/2014/07/23/delegate-and-event-in-cpp.html</loc>
+    
+    <lastmod>2014-07-23T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/15/android-development-study-note8.html</loc>
+    
+    <lastmod>2014-07-15T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/13/qt-signals-and-slots.html</loc>
+    
+    <lastmod>2014-07-13T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/12/android-development-study-note7.html</loc>
+    
+    <lastmod>2014-07-12T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/07/android-development-study-note6.html</loc>
+    
+    <lastmod>2014-07-07T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/06/android-development-study-note5.html</loc>
+    
+    <lastmod>2014-07-06T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/06/android-development-study-note4.html</loc>
+    
+    <lastmod>2014-07-06T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/04/android-development-study-note3.html</loc>
+    
+    <lastmod>2014-07-04T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/04/android-development-study-note2.html</loc>
+    
+    <lastmod>2014-07-04T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/03/android-development-study-note1.html</loc>
+    
+    <lastmod>2014-07-03T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html</loc>
+    
+    <lastmod>2014-07-01T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/07/01/class-design-in-python.html</loc>
+    
+    <lastmod>2014-07-01T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html</loc>
+    
+    <lastmod>2014-06-29T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/06/18/solve-fizzbuzz-question-in-python-way.html</loc>
+    
+    <lastmod>2014-06-18T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html</loc>
+    
+    <lastmod>2014-06-18T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/06/18/a-solution-for-interval-overlap-merging.html</loc>
+    
+    <lastmod>2014-06-18T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/06/17/a-solution-for-nnnnnnnnnn-question.html</loc>
+    
+    <lastmod>2014-06-17T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/06/11/software-life-cycle-and-a-practical-git-workflow.html</loc>
+    
+    <lastmod>2014-06-11T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <url>
+    <loc>/2014/06/11/create-a-webpy-based-web-server-with-nginx-and-uwsgi.html</loc>
+    
+    <lastmod>2014-06-11T00:00:00+08:00</lastmod>
+    
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</urlset>

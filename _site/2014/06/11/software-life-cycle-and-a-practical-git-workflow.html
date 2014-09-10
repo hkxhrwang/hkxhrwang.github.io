@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>一个使用Git workflow 管理软件生命周期的成熟方案 | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">一个使用Git workflow 管理软件生命周期的成熟方案</h1>
+
+    <h1 id="software-life-cycle-and-a-practical-git-workflow">Software life cycle and a practical git workflow</h1>
+
+<h3 id="git-workflow1"><a href="http://www.juvenxu.com/2010/11/28/a-successful-git-branching-model/">最近看到一篇非常好的关于实际软件开发团队中可行的Git workflow的文章</a>，很有感触，结合之前关于软件生命周期的相关经验，梳理一下自己的思路。</h3>
+
+<h3 id="section">软件生命周期</h3>
+<p>大型软件，比如Windows，Office，BizTalk Server等，代码规模很大，开发人员众多，并且经常位于全球各地，这对代码管理和流程控制提出了很高的要求。像微软、IBM等大型软件公司内部都有完善的代码控制、测试和发布流程，本文以微软内部软件生命周期为例。</p>
+
+<h4 id="ctp---beta---rc---rtm">CTP - Beta - RC - RTM</h4>
+<ul>
+  <li>CTP - customer technology preview, 向潜在目标客户介绍新产品或者已有产品的新版本中的主打功能或者功能更新。收集客户反馈，相应调整产品功能点。_这里省略了之前的market research, 确定产品需求文档等。</li>
+  <li>Beta - 在CTP版本的基础上，结合试用客户反馈和业内评测结果以及行业发展，调整软件需求文档，完整的产品测试以及bug修复后，公开发布的试用版。</li>
+  <li>RC - Release candidate, 公测版发布后，结合客户反馈，对使用中和测试中出现的bug进行triage，prioritize并修复，功能点开发完全完成并稳定的版本。</li>
+  <li>RTM - Release to manufacture, 产品最终的发布版本。</li>
+  <li>售后技术支持 - 针对产品发布后出现的bug提供技术支持，hotfix补丁包以及Service pack。</li>
+  <li>结合客户反馈和行业发展，确定下个版本的技术平台（通常涉及对新技术或者协议的支持、和其他软件产品的配合等）</li>
+</ul>
+
+<p>大家都知道，微软是一家非常重视软件测试的公司，内部的测试流程非常严格，这其实是大规模软件产品所必须的。</p>
+
+<p>从CTP开始，每个产品会有一个由产品、开发和测试相关人员组成的triage meeting小组，这个小组定期review新发现的bug，确定产品功能点调整需求，给现有bug确定优先级，review test plan进行质量控制，拿BizTalk Server举例：</p>
+
+<ol>
+  <li>每天针对现有已经check in的代码打包，有专门的team维护相应的打包脚本。</li>
+  <li>在新版本的基础上，运行已有的自动化测试用例，产品规模和复杂大越大，测试用例越多。但是根据测试用例的测试点和复杂度，基本可以分为BVT（Basic verification test）suites，IDW（it does work？）suites，Functional（end to end的复杂测试用例集合）suites，BVT每个版本都会跑，确保及时发现任何regression bug；IDW和Functional的test suites根据确定的test plan进行测试并有test team对测试结果进行调查，code defect分配给开发，test issue自己解决，迭代推进。</li>
+  <li>Beta和RTM等对外发布的版本，会进行media validation，对软件的下载包或者光盘媒介进行最后的测试。</li>
+</ol>
+
+<h3 id="git-workflow">和上面的流程无缝结合的git workflow</h3>
+<p>在上面介绍的基础上，我们看看这个被广泛推荐的git workflow</p>
+
+<p><img src="/images/git-branch-1.png" alt="Sanjose" class="img-center" /></p>
+
+<h3 id="section-1">说明</h3>
+<ol>
+  <li>master分支和develop分支永远存在。</li>
+  <li>master分支上面的是对外发布的版本。</li>
+  <li>hotfix只从master分支，也就是已发布的版本代码中checkout，并在此基础上修复相应的bug，并最终merge回develop和master分支。</li>
+  <li>新功能模块分支从develop branch checkout，开发完成后merge会develog分支。</li>
+  <li>release分支上面是各个milestone的版本，只从develop分支checkout，发布后merge到develop和master分支。</li>
+</ol>
+
+<h4 id="workflow">结合上面提到的软件生命周期和顺便提到的测试流程，很容易把软件开发各个阶段的代码控制和这个workflow结合起来。</h4>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/06/11/create-a-webpy-based-web-server-with-nginx-and-uwsgi.html" title="建立基于web.py，Nginx and uWsgi的RESTful网站">建立基于web.py，Nginx and uWsgi的RESTful网站&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/06/17/a-solution-for-nnnnnnnnnn-question.html" title="[Algorithm]N+NN+NNN+NNNN... question">&larr; [Algorithm]N+NN+NNN+NNNN... question</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/06/11/software-life-cycle-and-a-practical-git-workflow.html" title="一个使用Git workflow 管理软件生命周期的成熟方案" rel="nofollow">一个使用Git workflow 管理软件生命周期的成熟方案</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>11 June 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Testing-ref">Testing <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#Git-ref">Git <span>1</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

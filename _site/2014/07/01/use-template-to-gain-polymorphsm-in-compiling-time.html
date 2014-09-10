@@ -1,0 +1,397 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>模板基类与编译期多态 | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">模板基类与编译期多态</h1>
+
+    <h3 id="section">引子</h3>
+
+<h4 id="curiously-recurring-template-pattern2">知乎上有个<a href="http://www.zhihu.com/question/24287316">关于模板基类的问题</a>，很有意思，正如答题的知友们提到的，这个问题可以引申到<a href="http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern">curiously recurring template pattern</a>。</h4>
+
+<h4 id="cboost">模板在C++标准库和其他一些被广泛应用的第三方库（比如Boost）中应用的非常广泛，虽然影响到了代码的可读性，但是极大减少了代码量，提供了灵活设计的可能。</h4>
+
+<h4 id="vczh34haskell">关于模板元编程，<a href="http://www.zhihu.com/people/geniusvczh">vczh</a>牛牛在<a href="http://www.cppblog.com/vczh/archive/2013/03/24/198769.html">这篇文章</a>中提到学完数学家们发明的Haskell之后：</h4>
+<blockquote>
+  <h5 id="enumscalacase-type">于是回过头来，模板元编程也就变成一个很自然的东西了。你把模板元编程看成是一门语言，把“类型”本身看成是一个巨大的带参数enum的一部分（scala叫case type），于是类型的名字就变成了值，那么模板元编程的技巧，其实就是对类型进行变换、操作和计算的过程。</h5>
+</blockquote>
+
+<h4 id="haskellhaskellhaskell">本文不讨论Haskell，笔者看完上面的文章后，配置好Haskell的开发环境，了解过一些Haskell的语法，但远未入门。这里只是想在知乎上那个问题的基础上，讨论一下模板基类在实现编译器多态时的用法。</h4>
+
+<h3 id="section-1">编译期多态</h3>
+
+<h4 id="cvirtualoverride">在C++项目的设计开发中，我们用到的比较多的，是在含有virtual方法的基类基础上，通过继承和override而获得的运行时多态。也就是说，在运行时，基类的引用或者指针可以根据传递的派生类类型决定调用那个方法，从而达到动态绑定的目的。但是这种用法，程序需要维护一个指向虚函数表的虚函数指针，一定程度上会影响到性能。</h4>
+
+<h4 id="section-2">利用模板技术，我们可以把运行时进行的绑定前移到编译时，这样编译后的程序体积会相对变大，但是性能上没有损失，在性能敏感的场合比如嵌入式开发中有一定的意义。接下来，我们通过代码来看看如何通过设计模板基类来做到这一点。</h4>
+
+<ol>
+  <li>定义模板基类，“(static_cast&lt;T*&gt;(this)” 会将基类转化为派生类，从而调用派生类的方法。</li>
+</ol>
+
+<div class="highlight"><pre><code class="c--"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">Base</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="n">string</span> <span class="n">GetDisplayStr</span><span class="p">(){</span><span class="k">return</span> <span class="s">&quot;I am in Base.&quot;</span><span class="p">;}</span>
+	<span class="kt">void</span> <span class="n">SaySomething</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">T</span><span class="o">*&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">))</span><span class="o">-&gt;</span><span class="n">GetDisplayStr</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;}</span>
+
+<span class="nl">private:</span>
+
+<span class="p">};</span></code></pre></div>
+
+<ol>
+  <li>定义两个派生类，从上面的模板基类继承。</li>
+</ol>
+
+<div class="highlight"><pre><code class="c--"><span class="k">class</span> <span class="nc">DerivedA</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Base</span><span class="o">&lt;</span><span class="n">DerivedA</span><span class="o">&gt;</span>
+<span class="p">{</span>
+    <span class="c1">//no additional code here</span>
+<span class="p">};</span>
+
+<span class="k">class</span> <span class="nc">DerivedB</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Base</span><span class="o">&lt;</span><span class="n">DerivedB</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+	<span class="k">static</span> <span class="n">string</span> <span class="n">GetDisplayStr</span><span class="p">(){</span><span class="k">return</span> <span class="s">&quot;I am in DerivedB.&quot;</span><span class="p">;}</span> <span class="c1">//re-define the method</span>
+<span class="p">};</span></code></pre></div>
+
+<ol>
+  <li>定义一个模板方法</li>
+</ol>
+
+<div class="highlight"><pre><code class="c--"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="kt">void</span> <span class="n">CallSaySomething</span><span class="p">(</span><span class="n">Base</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">p</span><span class="o">-&gt;</span><span class="n">SaySomething</span><span class="p">();</span>
+<span class="p">}</span></code></pre></div>
+
+<ol>
+  <li>通过下面的代码进行验证</li>
+</ol>
+
+<div class="highlight"><pre><code class="c--"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="n">Base</span><span class="o">&lt;</span><span class="n">DerivedA</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">ba</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DerivedA</span><span class="p">();</span>
+	<span class="n">Base</span><span class="o">&lt;</span><span class="n">DerivedB</span><span class="o">&gt;</span> <span class="o">*</span><span class="n">bb</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DerivedB</span><span class="p">();</span>
+	<span class="n">CallSaySomething</span><span class="p">(</span><span class="n">ba</span><span class="p">);</span>
+	<span class="n">CallSaySomething</span><span class="p">(</span><span class="n">bb</span><span class="p">);</span>
+	<span class="k">delete</span> <span class="n">ba</span><span class="p">;</span>
+	<span class="k">delete</span> <span class="n">bb</span><span class="p">;</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<p>输出为：</p>
+
+<div class="highlight"><pre><code class="c--"><span class="n">I</span> <span class="n">am</span> <span class="n">in</span> <span class="n">Base</span><span class="p">.</span>
+<span class="n">I</span> <span class="n">am</span> <span class="n">in</span> <span class="n">DerivedB</span><span class="p">.</span></code></pre></div>
+
+<h4 id="gist5">可以看到我们没有用虚方法来实现多态，而且绑定在编译器就已经完成了。完整代码见<a href="https://gist.github.com/xhrwang/b3cd8ddc3dfb90ebcba6">gist</a></h4>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计">Python中的类型设计&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程">&larr; 安卓开发学习笔记1-Android系统架构和启动流程</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="nofollow">模板基类与编译期多态</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>01 July 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#C++-ref">C++ <span>6</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

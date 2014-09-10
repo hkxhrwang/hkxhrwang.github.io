@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>安卓开发学习笔记1-Android系统架构和启动流程 | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">安卓开发学习笔记1-Android系统架构和启动流程</h1>
+
+    <h4 id="blog">开始着手系统学习安卓开发，决定记录一下，一方面通过blog的形式自我督促，另一方面也通过整理思路来巩固所学到的知识点。</h4>
+
+<h4 id="section">之前收集学习资料的时候，看到一张<a href="http://androidtoast.iteye.com/blog/1151917">安卓开发学习路线图</a>，很有启发：</h4>
+<ol>
+  <li>基础 - Java编程语言，XML解析，Linux基础，数据库基础等。</li>
+  <li>入门 - Android系统架构，开发环境搭建，Android应用程序工程结构，应用布局，四大组件特性以及数据访问和存储等。</li>
+  <li>进阶 - Activity，Service，Broadcast receiver和content provider的熟练合理运用，多线程控制，多媒体管理，进程间通信以及高级控件的使用。</li>
+  <li>高级 - 自定义样式和主题，animation，2D/3D绘图，传感器应用，NDK开发，localization，不同设备不同版本的compatibility等</li>
+</ol>
+
+<h4 id="section-1">在学习一个平台的开发之前，对这个平台本身做一些了解是必要的，不仅有助于理解该平台开发的特点，也有利于在之后的开发过程中针对平台本身的特点进行设计。</h4>
+
+<h3 id="android">Android系统架构</h3>
+
+<h4 id="android2"><a href="https://source.android.com/devices/index.html">Android官网的系统架构图</a>如下：</h4>
+<p><img src="/images/system-architecture.png" alt="" /></p>
+
+<h4 id="section-2">参考官网的解释，安卓系统可以分为下面几层：</h4>
+<ol>
+  <li>Linux内核 - Android系统运行的基础，提供基本文件系统，硬件驱动以及内存和进程管理。</li>
+  <li>硬件抽象层（HAL） - 一个允许Android系统调用设备硬件的标准接口，硬件厂商可以在保证满足HAL的基础上针对设备硬件进行适合自己的优化。</li>
+  <li>系统服务层 - 由系统类服务（处理Activity manager，Window manager以及Notification manager等）和媒体类服务（提供多媒体的记录和播放等）组成，这些服务都是专注于某一个特定功能的模块化组件，便于Application framework API调用。</li>
+  <li>实现进程间通信IPC的Binder - 通过进程间通信封装了application framework和各类系统服务通信的细节，开发者可以专注在应用功能的开发或者说如何用好应用框架层提供的API。</li>
+  <li>应用框架层 - 应用框架层通过API提供了对HAL的控制，开发者开发的应用大部分基于这些API，并通过他们和设备硬件进行交互。</li>
+</ol>
+
+<h5 id="google-io-2014android-l-releaseartdalvikdalvik-vm">Google在 I/O 2014大会上推出Android L Release之后宣布，新版本系统将会完全用ART取代Dalvik，以获得更好的性能和电池寿命，同时提供更有效率的垃圾回收功能。同时这张官网的系统架构图也没有了Dalvik VM的介绍。</h5>
+
+<h3 id="android-1">Android系统启动流程</h3>
+
+<h4 id="android-l-releaseartandroidromdalvik-vm">Android L Release使用ART的启动流程应该和现在大家熟悉的流程有所不同，相信不久后专注Android第三方ROM开发的朋友们会对其有系统的讨论，现在，对于学习安卓应用开发而言，先了解一下基于Dalvik VM的安卓系统启动流程。</h4>
+
+<h4 id="androidlinuxlinux3">Android系统是基于Linux内核的，其启动前期的流程和Linux系统启动流程是类似的，借用<a href="http://en.miui.com/thread-15659-1-1.html">小米英文官网的一张图</a>：</h4>
+<p><img src="/images/bootprocess.jpg" alt="" /></p>
+
+<ol>
+  <li>按下电源开机后，安卓设备会从ROM中特定的分区加载系统引导程序Bootloader。</li>
+  <li>系统引导程序由硬件厂商提供，首先针对CPU和主板进行初始化，检测外部RAM并为下一步做一些准备工作；然后引导程序会初始化网络连接，内存等加载Linux内核时需要的任务，这时可以准备加载内核时的一些配置和参数。</li>
+  <li>准备工作完成后，引导程序开始加载系统内核，并启动第一个安卓系统进程init</li>
+  <li>init启动后会挂载文件系统目录，度init.rc配置脚本，该脚本由安卓初始化语言定义，包含Actions，Commands，Services以及Options。根据配置会启动管理USB连接的usbd服务，我们熟悉的adbd，以及最后会启动两个重要的进程，zygote和runtime进程，runtime将初始化service manager，用来提供Binder services的注册和查找，完成后runtime将请求zygote启动system service，这时zygote将会孵化出第一个Dalvik实例并启动system service，system service会启动两个native服务Surface flinger和Audio Flinger，这两个服务会在service manger注册提供IPC服务；之后，system service会启动application framework API与之通信的安卓系统管理服务。
+<img src="/images/init.gif" alt="" /></li>
+  <li>安卓系统服务启动后，安卓系统启动流程就结束了，系统将广播“ACTION_BOOT_COMPLETED”并启动Home activity。</li>
+</ol>
+
+<h4 id="section-3">这里需要引用几篇关于安卓启动流程的好文章，这些文章从不同的角度讲解了这一流程，对我们理解安卓系统从加电启动到系统初始化完成所作的事情很有帮助：</h4>
+
+<ul>
+  <li><a href="http://blog.jobbole.com/67931/">Android启动过程深入解析</a></li>
+  <li><a href="http://www.cnblogs.com/wiikii-/archive/2013/04/14/wiikii.html">Android系统启动流程</a></li>
+  <li><a href="http://mobile.51cto.com/hot-285155.htm">Android系统启动过程剖析</a></li>
+  <li><a href="http://en.miui.com/thread-15659-1-1.html">Understanding Android Boot Process</a></li>
+</ul>
+
+<h4 id="activityservicebroadcast-receivercontent-provider">本文主要整理了安卓系统架构和安卓系统启动流程，如文章最前面所说，了解这些有助于我们更好得在安卓平台开发应用程序，这些也是理解安卓应用程序中关键组件比如activity，service，broadcast receiver以及content provider如何工作以及各自生命周期的基础。</h4>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态">模板基类与编译期多态&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持">&larr; 安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="nofollow">安卓开发学习笔记1-Android系统架构和启动流程</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>03 July 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Android-ref">Android <span>9</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

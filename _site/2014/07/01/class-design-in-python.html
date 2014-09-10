@@ -1,0 +1,417 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>Python中的类型设计 | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">Python中的类型设计</h1>
+
+    <h3 id="python">Python中的类</h3>
+
+<h4 id="cpythonpython">和C++等静态强类型语言不通，Python是动态类型语言，天然支持动态绑定，在Python中一切皆对象，类也一样。</h4>
+
+<h4 id="python-1">在Python中定义一个类，需要明确下面几个概念</h4>
+
+<ul>
+  <li>类属性 - 需要在类中显式定义，可以通过类方法，类实例方法读取，只能通过类方法以及类本身调用来修改，当然也可以在类静态方法中通过类本身调用修改。</li>
+  <li>类实例属性 - 可以在类外动态定义，也可以在类实例方法中定义。</li>
+  <li>类方法 - 通过类名访问的方法。（非私有方法）</li>
+  <li>类实例方法 - 通过类实例访问的方法 （非私有方法）</li>
+  <li>类静态方法 - 不需要接受self或者cls参数，通过类名访问</li>
+</ul>
+
+<h4 id="section">另外需要提到的是，类属性，类实例属性以及类方法，类实例方法，类静态方法都可以定义为私有方法，通过在名称前加两个下划线__实现。</h4>
+
+<h4 id="section-1">下面，我们通过一个例子来看看这些概念的使用方法</h4>
+
+<ol>
+  <li>定义Car类</li>
+</ol>
+
+<div class="highlight"><pre><code class="python"><span class="k">class</span> <span class="nc">Car</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A base class for all cars&quot;&quot;&quot;</span>
+
+    <span class="c"># A class attribute</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="s">&quot;NO2&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;Unknown&quot;</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the private class attributes&quot;&quot;&quot;</span>
+
+        <span class="c"># Here are 2 class instance attributes</span>
+        <span class="c"># name is a public attribute, while __price is a private attribute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__price</span> <span class="o">=</span> <span class="n">price</span>
+
+    <span class="c"># A class method</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">explain_self</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the essential information about the class&quot;&quot;&quot;</span>
+
+        <span class="k">print</span> <span class="s">&quot;The engine of car is&quot;</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">engine</span>
+
+    <span class="c"># A static method</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">change_engine</span><span class="p">(</span><span class="n">new_engine</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Change the engine type&quot;&quot;&quot;</span>
+
+        <span class="n">Car</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">new_engine</span>  <span class="c"># Need to use &quot;class.attribute&quot;</span>
+
+    <span class="c"># A class instance method</span>
+    <span class="k">def</span> <span class="nf">about_me</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the essential information about the class&quot;&quot;&quot;</span>
+
+        <span class="k">print</span> <span class="s">&quot;This car is&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;whose price is&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__price</span></code></pre></div>
+
+<ol>
+  <li>通过下面的方法调用：</li>
+</ol>
+
+<div class="highlight"><pre><code class="python"><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">c1</span> <span class="o">=</span> <span class="n">Car</span><span class="p">(</span><span class="s">&quot;AUDI&quot;</span><span class="p">,</span> <span class="mi">200000</span><span class="p">)</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">about_me</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&quot;Before change, the engine of&quot;</span><span class="p">,</span> <span class="n">c1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;is&quot;</span><span class="p">,</span> <span class="n">c1</span><span class="o">.</span><span class="n">engine</span>
+    <span class="n">c1</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="s">&quot;Gas&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;After change, the engine of&quot;</span><span class="p">,</span> <span class="n">c1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&quot;is&quot;</span><span class="p">,</span> <span class="n">c1</span><span class="o">.</span><span class="n">engine</span>
+
+    <span class="n">Car</span><span class="o">.</span><span class="n">explain_self</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&quot;Before change, the engine of Car is&quot;</span><span class="p">,</span> <span class="n">Car</span><span class="o">.</span><span class="n">engine</span>
+    <span class="n">Car</span><span class="o">.</span><span class="n">change_engine</span><span class="p">(</span><span class="s">&quot;Gas and NO2&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;After change, the engine of Car is&quot;</span><span class="p">,</span> <span class="n">Car</span><span class="o">.</span><span class="n">engine</span>
+
+    <span class="n">c2</span> <span class="o">=</span> <span class="n">Car</span><span class="p">(</span><span class="s">&quot;BMW&quot;</span><span class="p">,</span> <span class="mi">300000</span><span class="p">)</span>
+    <span class="n">c2</span><span class="o">.</span><span class="n">about_me</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s">&quot;The engine of BMW is&quot;</span><span class="p">,</span> <span class="n">Car</span><span class="o">.</span><span class="n">engine</span>
+
+    <span class="k">print</span> <span class="n">Car</span><span class="o">.</span><span class="n">__dict__</span>     <span class="c">#  对象的说明文档信息</span>
+    <span class="k">print</span> <span class="n">Car</span><span class="o">.</span><span class="n">__doc__</span>      <span class="c">#  对象所包含的元素信息</span>
+    <span class="k">print</span> <span class="n">Car</span><span class="o">.</span><span class="n">__module__</span>   <span class="c">#  对象的模块信息</span>
+
+    <span class="k">print</span> <span class="n">c1</span><span class="o">.</span><span class="n">__dict__</span></code></pre></div>
+
+<p>输出为：</p>
+
+<div class="highlight"><pre><code class="python"><span class="n">This</span> <span class="n">car</span> <span class="ow">is</span> <span class="n">AUDI</span> <span class="n">whose</span> <span class="n">price</span> <span class="ow">is</span> <span class="mi">200000</span>
+<span class="n">Before</span> <span class="n">change</span><span class="p">,</span> <span class="n">the</span> <span class="n">engine</span> <span class="n">of</span> <span class="n">AUDI</span> <span class="ow">is</span> <span class="n">NO2</span>
+<span class="n">After</span> <span class="n">change</span><span class="p">,</span> <span class="n">the</span> <span class="n">engine</span> <span class="n">of</span> <span class="n">AUDI</span> <span class="ow">is</span> <span class="n">Gas</span>
+<span class="n">The</span> <span class="n">engine</span> <span class="n">of</span> <span class="n">car</span> <span class="ow">is</span> <span class="n">NO2</span>
+<span class="n">Before</span> <span class="n">change</span><span class="p">,</span> <span class="n">the</span> <span class="n">engine</span> <span class="n">of</span> <span class="n">Car</span> <span class="ow">is</span> <span class="n">NO2</span>
+<span class="n">After</span> <span class="n">change</span><span class="p">,</span> <span class="n">the</span> <span class="n">engine</span> <span class="n">of</span> <span class="n">Car</span> <span class="ow">is</span> <span class="n">Gas</span> <span class="ow">and</span> <span class="n">NO2</span>
+<span class="n">This</span> <span class="n">car</span> <span class="ow">is</span> <span class="n">BMW</span> <span class="n">whose</span> <span class="n">price</span> <span class="ow">is</span> <span class="mi">300000</span>
+<span class="n">The</span> <span class="n">engine</span> <span class="n">of</span> <span class="n">BMW</span> <span class="ow">is</span> <span class="n">Gas</span> <span class="ow">and</span> <span class="n">NO2</span>
+<span class="p">{</span><span class="s">&#39;engine&#39;</span><span class="p">:</span> <span class="s">&#39;Gas and NO2&#39;</span><span class="p">,</span> <span class="s">&#39;__module__&#39;</span><span class="p">:</span> <span class="s">&#39;__main__&#39;</span><span class="p">,</span> <span class="s">&#39;change_engine&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">staticmethod</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x00000000026C4A98</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">&#39;about_me&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">about_me</span> <span class="n">at</span> <span class="mh">0x00000000026C8B38</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">&#39;explain_self&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="nb">classmethod</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x00000000026C4A68</span><span class="o">&gt;</span><span class="p">,</span> <span class="s">&#39;__doc__&#39;</span><span class="p">:</span> <span class="s">&#39;A base class for all cars&#39;</span><span class="p">,</span> <span class="s">&#39;__init__&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">__init__</span> <span class="n">at</span> <span class="mh">0x00000000026C89E8</span><span class="o">&gt;</span><span class="p">}</span>
+<span class="n">A</span> <span class="n">base</span> <span class="k">class</span> <span class="nc">for</span> <span class="nb">all</span> <span class="n">cars</span>
+<span class="n">__main__</span>
+<span class="p">{</span><span class="s">&#39;engine&#39;</span><span class="p">:</span> <span class="s">&#39;Gas&#39;</span><span class="p">,</span> <span class="s">&#39;_Car__price&#39;</span><span class="p">:</span> <span class="mi">200000</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;AUDI&#39;</span><span class="p">}</span></code></pre></div>
+
+<h4 id="gist1">完整代码见<a href="https://gist.github.com/xhrwang/93d6a10baaf7012271bc">gist</a></h4>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态">&larr; 模板基类与编译期多态</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="nofollow">Python中的类型设计</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>01 July 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Python-ref">Python <span>3</span></a></li>
+     
+    	<li><a href="/tags.html#OOD-ref">OOD <span>1</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

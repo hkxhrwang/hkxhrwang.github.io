@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>建立基于web.py，Nginx and uWsgi的RESTful网站 | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">建立基于web.py，Nginx and uWsgi的RESTful网站</h1>
+
+    <h1 id="create-a-webpy-based-web-server-with-nginx-and-uwsgi">Create a web.py based web server with Nginx and uWsgi</h1>
+
+<h3 id="webpy">web.py</h3>
+
+<p><a href="http://webpy.org/">web.py是一个开源、轻量级的 python web框架</a>，使用其可以非常方便地创建网站，特别是RESTful的API</p>
+
+<h3 id="uwsgi">uWsgi</h3>
+<p>常用的部署Python projects的方式有FastCGI和uWsgi：</p>
+
+<ul>
+  <li>FastCGI: 每个Python app都有一个进程，分别和http服务器进行通信</li>
+  <li><a href="http://uwsgi-docs.readthedocs.org/en/latest/index.html">uWsgi</a>: 让Python apps部署具有和php-cgi类似的便利性，性能优秀，同时进行多个app的管理，具有详尽的日志记录能力，并提供web server相关的高度可定制性。</li>
+</ul>
+
+<h2 id="section">#</h2>
+
+<p><img src="http://down.chinaz.com/upload/2011/12/8/201112817335078221.jpg" alt="" /></p>
+
+<h3 id="nginx">Nginx</h3>
+<p>体积小，近年市场占有率迅速增加的web server，不多介绍。</p>
+
+<h3 id="section-1">闲言少叙，进入正题</h3>
+<ul>
+  <li>OS: Ubuntu 14.04LTS</li>
+  <li>Python Version: 2.7</li>
+</ul>
+
+<h4 id="virtualenv">安装virtualenv</h4>
+<pre><code>sudo apt-get install -y python-virtualenv
+</code></pre>
+
+<h4 id="python">安装python开发环境</h4>
+<pre><code>sudo apt-get install -y python-dev
+</code></pre>
+
+<h4 id="uwsgi-1">安装uWsgi</h4>
+<pre><code>sudo apt-get install -y uwsgi
+</code></pre>
+
+<h4 id="uwsgi-python">安装uwsgi-python插件</h4>
+<pre><code>sudo apt-get install -y uwsgi-plugin-python
+</code></pre>
+
+<h4 id="nginx-1">安装Nginx</h4>
+<pre><code>sudo apt-get install -y nginx-full
+</code></pre>
+
+<h4 id="nginx-2">安装nginx的附件</h4>
+<pre><code>sudo apt-get install -y nginx-extras
+</code></pre>
+
+<h4 id="uwsgi-2">使用下面的命令新建并打开uWsgi的配置文件</h4>
+<pre><code>sudo vi /etc/uwsgi/apps-available/vhosts.ini
+</code></pre>
+
+<h4 id="vhostsini-yourusernameweb-server">将下面的内容拷贝入vhosts.ini, 替换YOURUSERNAME为web server的用户</h4>
+<pre><code>[uwsgi]
+plugins = python
+gid = YOURUSERNAME
+uid = YOURUSERNAME
+vhost = true
+logdate
+socket = 127.0.0.1:9980
+master = true
+processes = 1
+harakiri = 20
+limit-as = 128
+memory-report
+no-orphans
+</code></pre>
+
+<h4 id="nginx-3">使用下面的命令新建并打开Nginx的站点配置文件</h4>
+<pre><code>sudo vi /etc/nginx/sites-available/siteinpython
+</code></pre>
+
+<h4 id="vhostsini">将下面的内容拷贝入vhosts.ini</h4>
+<pre><code>server {
+  	listen 9981;
+  	server_name 127.0.0.1;
+  	location / {
+	include uwsgi_params;
+	uwsgi_param UWSGI_CHDIR /home/rwang/python/api;
+	uwsgi_param UWSGI_PYHOME /home/rwang/python/api;
+	uwsgi_param UWSGI_SCRIPT api;
+	uwsgi_pass 127.0.0.1:9980;
+  		}
+}
+</code></pre>
+
+<h4 id="section-2">分别创建刚才创建的两个配置文件的软链接</h4>
+<pre><code>sudo ln -s /etc/uwsgi/apps-available/vhosts.ini /etc/uwsgi/apps-enabled/
+sudo ln -s /etc/nginx/sites-available/siteinpython /etc/nginx/sites-enabled/
+</code></pre>
+
+<h4 id="nginxetcnginxnginxconfyourusernameweb-server">修改Nginx的配置文件/etc/nginx/nginx.conf,替换YOURUSERNAME为web server的用户</h4>
+<pre><code>user YOURUSERNAME;
+</code></pre>
+
+<h4 id="uwsginginx">重启uWsgi和Nginx服务</h4>
+<pre><code>sudo service uwsgi restart
+sudo service nginx restart
+</code></pre>
+
+<h4 id="virtualenvpython-appapi">使用virtualenv创建一个python app沙盒，名为api</h4>
+<pre><code>virtualenv api
+cd api
+</code></pre>
+
+<h4 id="pythondjangobest-practice">进入沙盒环境，使用沙盒的原因详见<a href="http://www.jeffknupp.com/blog/2013/12/18/starting-a-django-16-project-the-right-way/">这里</a>,这篇文章还介绍了一些使用python创建网站，特别是Django网站的一些<strong>Best practice</strong></h4>
+<pre><code>source bin/activate
+</code></pre>
+
+<h4 id="webpy-1">在沙盒环境中安装web.py</h4>
+<pre><code>pip install web.py
+</code></pre>
+
+<h4 id="apipythonapipy-">在api目录下，新建一个python源码文件api.py, 将下面的代码放入并保存</h4>
+<pre><code>#!/usr/bin/env python
+import web
+
+urls = (
+	      '/(.*)', 'index'
+	   )
+
+class index:
+	def GET(self, name):
+  		return "Hello, World"
+
+app = web.application(urls, globals())
+application = app.wsgifunc()
+</code></pre>
+
+<h2 id="section-3">#</h2>
+
+<h4 id="visit-http1270019981-the-page-is-now-online-in-local-domain">Visit http://127.0.0.1:9981, the page is now online in local domain</h4>
+
+<h3 id="that-is-it-enjoy-it-and-code-python-with-webpy-with-fun">That is it! Enjoy it, and code python with web.py with fun.</h3>
+
+<h2 id="section-4">#</h2>
+
+<h4 id="section-5">参考资料</h4>
+<ol>
+  <li><a href="http://lars.la/nginx_uwsgi.html">Nginx and uWSGI</a></li>
+  <li><a href="http://lars.la/webpy_and_virtualenv.html">web.py and virtualenv</a></li>
+</ol>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+
+      
+      <li class="previous"><a href="/2014/06/11/software-life-cycle-and-a-practical-git-workflow.html" title="一个使用Git workflow 管理软件生命周期的成熟方案">&larr; 一个使用Git workflow 管理软件生命周期的成熟方案</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/06/11/create-a-webpy-based-web-server-with-nginx-and-uwsgi.html" title="建立基于web.py，Nginx and uWsgi的RESTful网站" rel="nofollow">建立基于web.py，Nginx and uWsgi的RESTful网站</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>11 June 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Python-ref">Python <span>3</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

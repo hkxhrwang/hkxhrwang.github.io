@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>编译部署 OpenWrt X86 VMWare 虚拟机 | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">编译部署 OpenWrt X86 VMWare 虚拟机</h1>
+
+    <h1 id="howto-x86openwrt-vmware-virtual-disk">HowTo: 编译X86架构的OpenWrt VMWare virtual disk</h1>
+
+<h3 id="openwrt">OpenWrt介绍</h3>
+
+<p><a href="https://openwrt.org/">OpenWrt</a>是可用于嵌入式设备的一个Linux开源发行版，主要用作智能路由器的操作系统，开发人员可以非常方便地基于自己的业务需求对该系统进行深度定制，从而提供离线下载，代理设置，<a href="http://wiki.openwrt.org/doc/howto/wireless.overview">Captive portal</a>等功能，在此基础上，将智能路由器打造成局域网智能中心，如果硬件配置足够，甚至可以在上面部署内部网站（比如PHP and uhttp web server），最近国内厂商基于占领用户客厅，打造家庭智能云而推出的各种智能路由器有很多就基于OpenWrt，比如<a href="https://code.google.com/p/openwrt-hiwifi/">极路由</a>，<a href="http://www.zhihu.com/question/22339109">小米路由器</a>等。</p>
+
+<p>在官方和广大开发者的贡献下，OpenWrt支持非常多的路由器型号，如果你手边有个路由器，<a href="http://wiki.openwrt.org/toh/start">查一下看是否支持</a>。</p>
+
+<h3 id="openwrt-x86vmware">为什么要编译OpenWrt x86的VMWare虚拟硬盘？</h3>
+<p>如果手边有OpenWrt支持的型号，就可以使用git或者svn同步OpenWrt的源码，设置好image所需的packages后，编译，然后通过路由器官方提供的固件升级途径进行刷机就可以了，如果你的路由器官方不支持第三方固件，就需要自己编译<a href="http://wiki.openwrt.org/?do=search&amp;id=uboot">uboot镜像</a>，打开路由器盒子，引出调试口的线，使用<a href="http://wiki.openwrt.org/?do=search&amp;id=tftp">tftp</a>进行刷机，风险比较大。在熟悉OpenWrt之前不想拿自己的路由器做小白鼠或者需要开发测试OpenWrt上的应用时，本地虚拟机是个不错的选择，而且VMWare虚拟机也能很方便地拓展硬盘，内存以及虚拟网卡，对业务拓展的适应性较好。</p>
+
+<h3 id="openwrt-x86vmware-1">编译OpenWrt X86的VMWare虚拟硬盘格式文件</h3>
+
+<h5 id="wiki8">1. 参考官方wiki进行<a href="http://wiki.openwrt.org/doc/howto/buildroot.exigence">编译环境的搭建</a></h5>
+
+<h5 id="openwrt-1">2. 同步OpenWrt的代码</h5>
+<pre><code>git clone git://git.openwrt.org/openwrt.git
+</code></pre>
+
+<h5 id="openwrt-2">3. 进入openwrt目录</h5>
+<pre><code>cd trunk/
+</code></pre>
+
+<h5 id="section">4. 更新并安装编译依赖的包</h5>
+<pre><code>scripts/feeds update -a
+scripts/feeds install –a
+</code></pre>
+
+<h5 id="section-1">5. 检查编译环境是否就绪</h5>
+<pre><code>make defconfig
+</code></pre>
+
+<h5 id="openwrtimage9linuxmenuconfigpackages">6. 配置openwrt的image，这里可以参考<a href="http://blog.csdn.net/openme_openwrt/article/details/7998389">这篇文章</a>。到这里可以看到，整个的流程和编译Linux内核非常像，只是进行menuconfig的时候需要进行更多的packages的选择和自定义。</h5>
+<pre><code>make menuconfig
+</code></pre>
+
+<h5 id="v99-trunkbinx86openwrt-x86-generic-combined-ext4vmdk">7. 开始编译，为了看到可能的错误详细信息，建议使用V=99参数，成功后就可以在看到文件 trunk/bin/x86/openwrt-x86-generic-combined-ext4.vmdk</h5>
+<pre><code>make
+</code></pre>
+
+<h5 id="vmwarelinux26xx86vmdk">8. 在VMWare中创建基于Linux2.6.x的x86虚拟机，然后选择从刚才编译的vmdk文件作为启动硬盘。</h5>
+
+<h5 id="vmware---vmnet1ip">9. 在启动前，进行下面的设置：从VMWare的工具栏中，点击“编辑” -&gt; “虚拟网络编辑器”，将VMnet1修改为仅主机模式，子网IP修改为：</h5>
+<pre><code>192.168.1.0
+</code></pre>
+
+<h5 id="vmnet1vmnet0openwrthostipdnshostipvmnet1ipopenwrt">10. 给刚才创建的虚拟机添加一个虚拟网卡，默认网卡设置为刚才修改的VMnet1，新建网卡设置为VMnet0桥接模式。这样，OpenWrt的虚拟机可以获取和host同一网段的IP，也可以通过自己的DNS给host分配一个IP，用于测试，当其他虚拟机使用VMnet1时，其得到的IP也是OpenWrt分配的。</h5>
+
+<h5 id="hostvmnet1dns19216811openwrteth1ip">11. 在host上注意修改VMnet1对应的虚拟网卡，设置其DNS服务器为192.168.1.1，我们之后会将OpenWrt的eth1设置为该IP。</h5>
+
+<h5 id="rootopenwrtssh-securecrtpclinuxssh">12. 启动虚拟机，进入系统后，修改root的密码，由于OpenWrt已经内置了SSH， 我们就可以通过SecureCRT之类的PC端软件或者Linux平台的SSH命令进行远程连接终端了。</h5>
+
+<h5 id="etcconfignetwork">13. 修改/etc/config/network文件为下面的内容</h5>
+
+<pre><code>config interface 'loopback'
+    option ifname 'lo'
+    option proto 'static'
+    option ipaddr '127.0.0.1'
+    option netmask '255.0.0.0'
+
+config interface 'lan'
+    option ifname 'eth0'
+    option proto 'static'
+    option ipaddr '192.168.1.1'
+    option netmask '255.255.255.0'
+    option ip6assign '60'
+
+config interface 'wan'
+    option ifname 'eth1'
+    option proto 'dhcp
+</code></pre>
+
+<h4 id="donehave-fun">Done！Have fun!</h4>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/06/18/a-solution-for-interval-overlap-merging.html" title="[Algorithm]Interval overlap merging">[Algorithm]Interval overlap merging&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案">&larr; FIZZBUZZ问题的Python解决方案</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="nofollow">编译部署 OpenWrt X86 VMWare 虚拟机</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>18 June 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Openwrt-ref">Openwrt <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#Linux-ref">Linux <span>1</span></a></li>
+     
+    	<li><a href="/tags.html#Cross compile-ref">Cross compile <span>1</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

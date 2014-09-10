@@ -1,0 +1,521 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>[Algorithm]N+NN+NNN+NNNN... question | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">[Algorithm]N+NN+NNN+NNNN... question</h1>
+
+    <h1 id="a-solution-for-nnnnnnnnnn-question">A solution for N+NN+NNN+NNNN… question</h1>
+
+<h3 id="section">题目描述</h3>
+
+<h5 id="input---n-mnmunsigned-int">Input:   字符串，合法内容为”N M”,N和M为正整数，unsigned int</h5>
+
+<h5 id="output--nnnnnnnnnnm">Output:  N+NN+NNN+NNNN…的值，M为相加的次数，每次被加数按照左边的格式增加位数</h5>
+
+<h5 id="example-1-3--1--11--111--12311-3--11--1111--111111--112233">Example: “1 3” 的输出为 1 + 11 + 111 = 123，”11 3” 的输出为 11 + 1111 + 111111 = 112233；非法输入提示相应错误信息。</h5>
+
+<h3 id="section-1">解决思路</h3>
+
+<ul>
+  <li>需要对输入字符串的输入进行合法性验证</li>
+  <li>需要考虑相加结果可能的数据类型越界</li>
+  <li>需要考虑不同CPU架构不同操作系统平台上不同整型数的取值范围</li>
+</ul>
+
+<h4 id="section-2">1. 声明下面的函数</h4>
+
+<div class="highlight"><pre><code class="c--"><span class="c1">//Test</span>
+<span class="kt">void</span> <span class="nf">TestCalculateSum</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="c1">//Checkout integeral types limits on current machine</span>
+<span class="kt">void</span> <span class="nf">TypeLimit</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="kt">bool</span> <span class="nf">ValidateAndGetNums</span><span class="p">(</span><span class="k">const</span> <span class="n">string</span> <span class="o">&amp;</span><span class="n">input</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">metaValue</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">sequenceValue</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">metaValueDigits</span><span class="p">);</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="nf">Calculate</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">metaValue</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">sequenceValue</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">metaValueDigit</span><span class="p">);</span>
+<span class="c1">//Function entry for question one</span>
+<span class="kt">void</span> <span class="nf">CalculateSum</span><span class="p">(</span><span class="k">const</span> <span class="n">string</span> <span class="o">&amp;</span><span class="n">input</span><span class="p">);</span></code></pre></div>
+
+<h4 id="tdd">2. TDD推荐首先设计单元测试用例</h4>
+
+<div class="highlight"><pre><code class="c--"><span class="kt">void</span> <span class="nf">TestCalculateSum</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="c1">//Print the value range of integral types</span>
+	<span class="n">TypeLimit</span><span class="p">();</span>
+
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;1 4&quot;</span><span class="p">);</span>
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;2 3&quot;</span><span class="p">);</span>
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;11 2&quot;</span><span class="p">);</span>
+
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">);</span> <span class="c1">//will output error message</span>
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">);</span> <span class="c1">//will output error message</span>
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">);</span> <span class="c1">//will output error message</span>
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;9&quot;</span><span class="p">);</span> <span class="c1">//will output error message</span>
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;9 two&quot;</span><span class="p">);</span> <span class="c1">//will output error message</span>
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;-2 3&quot;</span><span class="p">);</span> <span class="c1">//will output error message</span>
+	<span class="n">CalculateSum</span><span class="p">(</span><span class="s">&quot;11 100&quot;</span><span class="p">);</span> <span class="c1">//will output error message</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="section-3">3. 检查并打印出整型数据类型在当前环境的取值范围</h4>
+
+<div class="highlight"><pre><code class="c--"><span class="kt">void</span> <span class="nf">TypeLimit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">string</span> <span class="n">formatter_int</span> <span class="o">=</span> <span class="s">&quot;%-20s</span><span class="se">\t</span><span class="s">%-5d</span><span class="se">\t</span><span class="s">%-20d</span><span class="se">\t</span><span class="s">%-20d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+	<span class="n">string</span> <span class="n">formatter_unsgined_int</span> <span class="o">=</span> <span class="s">&quot;%-20s</span><span class="se">\t</span><span class="s">%-5d</span><span class="se">\t</span><span class="s">%-20u</span><span class="se">\t</span><span class="s">%-20u</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+	<span class="n">string</span> <span class="n">formatter_long</span> <span class="o">=</span> <span class="s">&quot;%-20s</span><span class="se">\t</span><span class="s">%-5d</span><span class="se">\t</span><span class="s">%-20ld</span><span class="se">\t</span><span class="s">%-20ld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+	<span class="n">string</span> <span class="n">formatter_unsgined_long</span> <span class="o">=</span> <span class="s">&quot;%-20s</span><span class="se">\t</span><span class="s">%-5d</span><span class="se">\t</span><span class="s">%-20lu</span><span class="se">\t</span><span class="s">%-20lu</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+	<span class="n">string</span> <span class="n">formatter_long_long</span> <span class="o">=</span> <span class="s">&quot;%-20s</span><span class="se">\t</span><span class="s">%-5d</span><span class="se">\t</span><span class="s">%-20lld</span><span class="se">\t</span><span class="s">%-20lld</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+	<span class="n">string</span> <span class="n">formatter_unsgined_long_long</span> <span class="o">=</span> <span class="s">&quot;%-20s</span><span class="se">\t</span><span class="s">%-5d</span><span class="se">\t</span><span class="s">%-20llu</span><span class="se">\t</span><span class="s">%-20llu</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+
+	<span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">************************  sizeof and limits info  **************</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Type</span><span class="se">\t\t\t</span><span class="s">sizeof</span><span class="se">\t</span><span class="s">Max</span><span class="se">\t\t\t</span><span class="s">Min&quot;</span><span class="p">);</span>
+	<span class="n">printf</span><span class="p">(</span><span class="n">formatter_int</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span>
+		<span class="s">&quot;short&quot;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">short</span><span class="p">),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">short</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">(),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">short</span><span class="o">&gt;::</span><span class="n">min</span><span class="p">());</span>
+	<span class="n">printf</span><span class="p">(</span><span class="n">formatter_int</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span>
+		<span class="s">&quot;int&quot;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">(),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;::</span><span class="n">min</span><span class="p">());</span>
+	<span class="n">printf</span><span class="p">(</span><span class="n">formatter_unsgined_int</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span>
+		<span class="s">&quot;unsigned int&quot;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">(),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;::</span><span class="n">min</span><span class="p">());</span>
+	<span class="n">printf</span><span class="p">(</span><span class="n">formatter_long</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span>
+		<span class="s">&quot;long&quot;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">long</span><span class="p">),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">(),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">long</span><span class="o">&gt;::</span><span class="n">min</span><span class="p">());</span>
+	<span class="n">printf</span><span class="p">(</span><span class="n">formatter_unsgined_long</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span>
+		<span class="s">&quot;unsigned long&quot;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">(),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">min</span><span class="p">());</span>
+	<span class="n">printf</span><span class="p">(</span><span class="n">formatter_long_long</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span>
+		<span class="s">&quot;long long&quot;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">long</span> <span class="kt">long</span><span class="p">),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">(),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">min</span><span class="p">());</span>
+	<span class="n">printf</span><span class="p">(</span><span class="n">formatter_unsgined_long_long</span><span class="p">.</span><span class="n">c_str</span><span class="p">(),</span>
+		<span class="s">&quot;unsigned long long&quot;</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span><span class="p">),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">(),</span> <span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">min</span><span class="p">());</span>
+	<span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">************************  sizeof and limits info  **************</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="section-4">4. 输入合法性验证的实现</h4>
+
+<div class="highlight"><pre><code class="c--"><span class="kt">bool</span> <span class="nf">ValidateAndGetNums</span><span class="p">(</span><span class="k">const</span> <span class="n">string</span> <span class="o">&amp;</span><span class="n">input</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">metaValue</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">sequenceValue</span><span class="p">,</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">metaValueDigits</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="c1">//Input validation</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">input</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span>
+	<span class="p">{</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Input string is </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;</span><span class="s">, Invalid, the input string is empty</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">input</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+		<span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="kt">int</span> <span class="n">spaceIndex</span> <span class="o">=</span> <span class="n">input</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="sc">&#39; &#39;</span><span class="p">);</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">spaceIndex</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Input string is </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;</span><span class="s">, Invalid, the input string format should be like </span><span class="se">\&quot;</span><span class="s">N M</span><span class="se">\&quot;</span><span class="s">, both N and M are positive integer.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">input</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+		<span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">string</span> <span class="n">firstPart</span> <span class="o">=</span> <span class="n">input</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">spaceIndex</span><span class="p">);</span>
+	<span class="n">metaValue</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">firstPart</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">metaValue</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Input string is </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;</span><span class="s">, Invalid, the first number should be a positive integer.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">input</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+		<span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="n">string</span> <span class="n">secondPart</span> <span class="o">=</span> <span class="n">input</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="n">spaceIndex</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+	<span class="n">sequenceValue</span> <span class="o">=</span> <span class="n">atoi</span><span class="p">(</span><span class="n">secondPart</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">sequenceValue</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Input string is </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;</span><span class="s">, Invalid, the second number should be a positive integer.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">input</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+		<span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="n">metaValueDigits</span> <span class="o">=</span> <span class="n">spaceIndex</span><span class="p">;</span>
+	<span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="section-5">5. 相加算法的实现，这里需要注意的是</h4>
+
+<ul>
+  <li>在计算过程中需要构造出每个被加数</li>
+  <li>在计算过程中需要确保每次计算不越界</li>
+  <li>用unsigned long long 来保存相加结果，由于unsigned long 和unsigned long long 在Ubuntu gcc4.8环境的取值范围一样，但是在Windows平台不同，所以使用unsigned long long 来保证相加结果的最大值在这两个平台是相同的。</li>
+</ul>
+
+<div class="highlight"><pre><code class="c--"><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="nf">Calculate</span><span class="p">(</span><span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">metaValue</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">sequenceValue</span><span class="p">,</span> <span class="k">const</span> <span class="kt">int</span> <span class="o">&amp;</span><span class="n">metaValueDigit</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">tempSum</span> <span class="o">=</span> <span class="n">metaValue</span><span class="p">;</span>
+	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">MAX</span> <span class="o">=</span> <span class="p">(</span><span class="n">numeric_limits</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span><span class="o">&gt;::</span><span class="n">max</span><span class="p">)();</span>
+
+	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">decimalIndex</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="n">metaValueDigit</span><span class="p">;</span> <span class="o">++</span><span class="n">index</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">MAX</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">&gt;</span> <span class="n">decimalIndex</span><span class="p">)</span>
+			<span class="n">decimalIndex</span> <span class="o">*=</span> <span class="mi">10</span><span class="p">;</span>
+		<span class="k">else</span>
+			<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">sequenceValue</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+	<span class="p">{</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+			<span class="n">sum</span> <span class="o">=</span> <span class="n">tempSum</span><span class="p">;</span>
+		<span class="k">else</span>
+		<span class="p">{</span>
+			<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">newValue</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+			<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+			<span class="p">{</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">MAX</span> <span class="o">/</span> <span class="n">decimalIndex</span> <span class="o">&gt;=</span> <span class="n">newValue</span><span class="p">)</span>
+				<span class="p">{</span>
+					<span class="n">newValue</span> <span class="o">*=</span> <span class="n">decimalIndex</span><span class="p">;</span>
+				<span class="p">}</span>
+				<span class="k">else</span>
+					<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+			<span class="p">}</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">MAX</span> <span class="o">/</span> <span class="n">newValue</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span><span class="p">)</span><span class="n">metaValue</span><span class="p">)</span>
+				<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+			<span class="k">if</span><span class="p">((</span><span class="n">MAX</span> <span class="o">-</span> <span class="n">newValue</span> <span class="o">*</span> <span class="n">metaValue</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">tempSum</span><span class="p">)</span>
+				<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+			<span class="n">tempSum</span> <span class="o">=</span> <span class="n">tempSum</span> <span class="o">+</span> <span class="n">metaValue</span> <span class="o">*</span> <span class="n">newValue</span><span class="p">;</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">MAX</span> <span class="o">-</span> <span class="n">tempSum</span> <span class="o">&lt;</span> <span class="n">sum</span><span class="p">)</span>
+				<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+			<span class="k">if</span><span class="p">(</span><span class="n">MAX</span> <span class="o">-</span> <span class="n">tempSum</span> <span class="o">==</span> <span class="n">sum</span> <span class="o">&amp;&amp;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">sequenceValue</span><span class="p">)</span>
+				<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+
+			<span class="n">sum</span> <span class="o">+=</span> <span class="n">tempSum</span><span class="p">;</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">sum</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="section-6">6. 进行计算的入口函数实现</h4>
+
+<div class="highlight"><pre><code class="c--"><span class="kt">void</span> <span class="nf">CalculateSum</span><span class="p">(</span><span class="k">const</span> <span class="n">string</span> <span class="o">&amp;</span><span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">metaValue</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">sequenceValue</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="kt">int</span> <span class="n">metaValueDigits</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ValidateAndGetNums</span><span class="p">(</span><span class="n">input</span><span class="p">,</span> <span class="n">metaValue</span><span class="p">,</span> <span class="n">sequenceValue</span><span class="p">,</span> <span class="n">metaValueDigits</span><span class="p">))</span>
+		<span class="k">return</span><span class="p">;</span>
+
+	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">Calculate</span><span class="p">(</span><span class="n">metaValue</span><span class="p">,</span> <span class="n">sequenceValue</span><span class="p">,</span> <span class="n">metaValueDigits</span><span class="p">);</span>
+	<span class="k">if</span><span class="p">(</span><span class="n">sum</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">&quot;%llu</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">sum</span><span class="p">);</span>
+	<span class="k">else</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Input string is </span><span class="se">\&quot;</span><span class="s">%s</span><span class="se">\&quot;</span><span class="s">, the result is out of the range of unsigned long long.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">input</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="main">7. 在main函数中这样调用：</h4>
+
+<div class="highlight"><pre><code class="c--"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="c1">//Test question one</span>
+	<span class="n">TestCalculateSum</span><span class="p">();</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/06/11/software-life-cycle-and-a-practical-git-workflow.html" title="一个使用Git workflow 管理软件生命周期的成熟方案">一个使用Git workflow 管理软件生命周期的成熟方案&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/06/18/a-solution-for-interval-overlap-merging.html" title="[Algorithm]Interval overlap merging">&larr; [Algorithm]Interval overlap merging</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/06/17/a-solution-for-nnnnnnnnnn-question.html" title="[Algorithm]N+NN+NNN+NNNN... question" rel="nofollow">[Algorithm]N+NN+NNN+NNNN... question</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>17 June 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Algorithm-ref">Algorithm <span>2</span></a></li>
+     
+    	<li><a href="/tags.html#C++-ref">C++ <span>6</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

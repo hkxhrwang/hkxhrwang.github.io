@@ -1,0 +1,397 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</h1>
+
+    <h3 id="broadcast-receiver">什么是Broadcast Receiver</h3>
+
+<h4 id="broadcast-receiver-androidandroidandroid-runtime-receiver-receivers--actionbootcompleted-android">Broadcast Receiver 是允许我们对Android系统或者Android应用程序的事件进行注册的组件。当一个事件发生时，Android Runtime 会通知所有注册到该事件的receiver，这些 receivers 事先定义的针对该事件的响应逻辑将被执行。比如，应用程序可以注册 ACTION_BOOT_COMPLETED 系统事件，当Android系统完成启动流程后，该应用程序就可以做出相应的响应。</h4>
+
+<h3 id="broadcast-receiver-1">Broadcast Receiver的实现</h3>
+<ol>
+  <li>可以在 AndroidManifestxml 文件中静态注册 receiver</li>
+  <li>可以在代码中使用 Context.registerReceiver() 方法动态注册 receiver</li>
+  <li>实现一个继承自 BroadcastReceiver 类型的类，并实现其 onReceive() 方法</li>
+  <li>当该receiver注册的事件发生时，Android 系统会调用该 receiver 的 onReceive() 方法</li>
+  <li>当一个 receiver 的 onReceive() 方法执行完后，Android系统就可以回收该 receiver 的资源。</li>
+</ol>
+
+<h4 id="api-lever-11-onreceive--receiver--android-anr-onreceive--service--api-level-11--goasyc--pendingresult-android-receiver-pendingresultfinish-">在 API lever 11 之前，onReceive() 方法中不能执行异步操作，当其执行完后，该 receiver 实例也会被 Android 系统销毁，所以为了避免ANR，如果需要执行需要较长时间运行的逻辑，最好在 onReceive() 方法中启动一个 Service 实例来工作。从 API level 11 之后，我们可以使用 goAsyc() 方法来执行异步操作，该方法返回一个 PendingResult 类型对象，Android系统不会销毁该 receiver 实例直到PendingResult.finish() 方法被调用。</h4>
+
+<h4 id="android-31--receiver-">从 Android 3.1 开始，如果用户显示地停止了某个应用程序的运行，默认情况下，则该应用的所有 receiver 注册的事件发生时它们都不会收到通知。</h4>
+
+<h3 id="broadcast-receiver-2">使用 Broadcast Receiver</h3>
+
+<h4 id="actionbootcompleted--receiver-">我们通过一个例子来看静态注册 action.BOOT_COMPLETED 事件的 receiver 如何实现。</h4>
+<ol>
+  <li>在 AndroidManifest.xml 文件中注册该 receiver，并申请 android.permission.RECEIVE_BOOT_COMPLETED 的权限：</li>
+</ol>
+
+<div class="highlight"><pre><code class="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+    <span class="nt">&lt;uses-permission</span> <span class="na">android:name=</span><span class="s">&quot;android.permission.RECEIVE_BOOT_COMPLETED&quot;</span> <span class="nt">/&gt;</span>
+    ...
+        <span class="nt">&lt;receiver</span> <span class="na">android:name=</span><span class="s">&quot;MyScheduleReceiver&quot;</span> <span class="nt">&gt;</span>
+            <span class="nt">&lt;intent-filter&gt;</span>
+                <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&quot;android.intent.action.BOOT_COMPLETED&quot;</span> <span class="nt">/&gt;</span>
+            <span class="nt">&lt;/intent-filter&gt;</span>
+        <span class="nt">&lt;/receiver&gt;</span>
+        <span class="nt">&lt;receiver</span> <span class="na">android:name=</span><span class="s">&quot;MyStartServiceReceiver&quot;</span> <span class="nt">&gt;</span>
+        <span class="nt">&lt;/receiver&gt;</span></code></pre></div>
+
+<ol>
+  <li>定义一个继承自 BroadcastReceiver 类型的类，并实现其 onReceive() 方法，本例中启动了一个Service：</li>
+</ol>
+
+<div class="highlight"><pre><code class="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyReceiver</span> <span class="kd">extends</span> <span class="n">BroadcastReceiver</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onReceive</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">Intent</span> <span class="n">intent</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// assumes WordService is a registered service</span>
+    <span class="n">Intent</span> <span class="n">intent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Intent</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">WordService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+    <span class="n">context</span><span class="o">.</span><span class="na">startService</span><span class="o">(</span><span class="n">intent</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
+
+<h5 id="sdcard-actionbootcompleted-sdcard">注意，测试的时候，包含本例的应用程序必须状态机身而不是SDCard中，否则当 action.BOOT_COMPLETED 事件发生时SDCard还没有初始化并挂载，该应用程序就无法响应该事件。</h5>
+
+<h4 id="receiver-">关于 receiver 动态注册事件，还是用例子来说明。</h4>
+<ol>
+  <li>使用 Context.registerReceiver() 可以动态注册一个 receiver 到一个事件，之后，一定要注意在合适的时候调用 Context.unregisterReceiver() 来取消注册，否则会发生 leaked broadcast receiver error</li>
+  <li>使用 package manager，可以在运行时 enable 或者 disable 一个静态注册的 receiver：</li>
+</ol>
+
+<div class="highlight"><pre><code class="java"><span class="n">ComponentName</span> <span class="n">receiver</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ComponentName</span><span class="o">(</span><span class="n">context</span><span class="o">,</span> <span class="n">myReceiver</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="n">PackageManager</span> <span class="n">pm</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getPackageManager</span><span class="o">();</span>
+
+<span class="n">pm</span><span class="o">.</span><span class="na">setComponentEnabledSetting</span><span class="o">(</span><span class="n">receiver</span><span class="o">,</span> 
+  <span class="n">PackageManager</span><span class="o">.</span><span class="na">COMPONENT_ENABLED_STATE_ENABLED</span><span class="o">,</span>
+  <span class="n">PackageManager</span><span class="o">.</span><span class="na">DONT_KILL_APP</span><span class="o">);</span></code></pre></div>
+
+<h4 id="sticky-broadcast-intents">关于 Sticky broadcast intents</h4>
+
+<h4 id="receiver--intent--android--sendstickybroadcastintent--intent-receiver--onreceive--intent-">一般情况下，当一个用来将 receiver 和事件动态注册的 Intent 对象被 Android 系统传递后就不能被使用了，但是使用 sendStickyBroadcast(Intent) 方法后，该 Intent 对象会一直存在，即使事件发生，receiver 的 onReceive() 也被执行完毕。这种情况主要用在我们想在 Intent 对象中保存相关系统信息的时候。</h4>
+
+<h3 id="broadcast-">Broadcast 的类型</h3>
+<ol>
+  <li><strong>Normal broadcast</strong>  - 通过 Context.sendBroadcast 异步发送。所有该广播的 receiver 会以未定义的顺序执行，一般情况下是同时进行的。</li>
+  <li><strong>Ordered broadcast</strong> - 通过 Context.sendOrderedBroadcast 顺序发送到每个 receiver，我们可以把一个 receiver 的执行结果传递给下一个 receiver，也可以在某个 receiver 里面放弃该广播的继续传递。receiver 被执行的数序可以通过 android:priority 定义，当多个 receiver 具有相同的 priority 的时候，它们的执行顺序是随机的。动态注册的 receiver 比静态注册的 receiver 优先级要高。</li>
+</ol>
+
+<h3 id="section">参考资料：</h3>
+
+<ol>
+  <li><a href="http://developer.android.com/reference/android/content/BroadcastReceiver.html">官网文档</a></li>
+  <li><a href="http://blog.csdn.net/zuolongsnail/article/details/6450156">Android中Broadcast Receiver组件详解</a></li>
+  <li><a href="http://www.vogella.com/tutorials/AndroidBroadcastReceiver/article.html">Android BroadcastReceiver - Tutorial</a></li>
+</ol>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽">Qt中的信号与槽&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现">&larr; 委托和事件的C++实现</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="nofollow">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>15 July 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Android-ref">Android <span>9</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

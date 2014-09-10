@@ -1,0 +1,515 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>安卓开发学习笔记3-Android应用开发中的布局 | Ross's Page</title>
+    
+
+    
+    <meta name="description" content="">
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title">安卓开发学习笔记3-Android应用开发中的布局</h1>
+
+    <h3 id="android">Android应用开发中的布局</h3>
+
+<h4 id="linearlayout---horizontalveticalandroidweightdemo">LinearLayout - 线性布局，根据设置的horizontal或者vetical依次摆放控件。下面的例子展示了使用android:weight定义的比例来定义控件布局的demo，包括水平和垂直方式的布局。</h4>
+
+<div class="highlight"><pre><code class="xml"><span class="nt">&lt;LinearLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+    <span class="na">xmlns:tools=</span><span class="s">&quot;http://schemas.android.com/tools&quot;</span>
+    <span class="na">android:orientation=</span><span class="s">&quot;vertical&quot;</span>
+    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">tools:context=</span><span class="s">&quot;.LinearLayoutActivity&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;LinearLayout</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;0dp&quot;</span>
+        <span class="na">android:layout_weight=</span><span class="s">&quot;1&quot;</span>
+        <span class="na">android:orientation=</span><span class="s">&quot;horizontal&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:background=</span><span class="s">&quot;#aa0000&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;0dp&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_weight=</span><span class="s">&quot;1&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:background=</span><span class="s">&quot;#00aa00&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;0dp&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_weight=</span><span class="s">&quot;2&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:background=</span><span class="s">&quot;#0000aa&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;0dp&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_weight=</span><span class="s">&quot;3&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/LinearLayout&gt;</span>
+
+    <span class="nt">&lt;LinearLayout</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;0dp&quot;</span>
+        <span class="na">android:layout_weight=</span><span class="s">&quot;2&quot;</span>
+        <span class="na">android:orientation=</span><span class="s">&quot;vertical&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:background=</span><span class="s">&quot;#550000&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;0dp&quot;</span>
+            <span class="na">android:layout_weight=</span><span class="s">&quot;1&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:background=</span><span class="s">&quot;#005500&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;0dp&quot;</span>
+            <span class="na">android:layout_weight=</span><span class="s">&quot;2&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:background=</span><span class="s">&quot;#000055&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;0dp&quot;</span>
+            <span class="na">android:layout_weight=</span><span class="s">&quot;3&quot;</span><span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;/LinearLayout&gt;</span>
+
+<span class="nt">&lt;/LinearLayout&gt;</span></code></pre></div>
+
+<ul>
+  <li>在整体布局采用垂直分布，其中中嵌套了两个LinearLayout。第一个采用水平分布，第二个采用垂直分布。</li>
+  <li>这两个子LinearLayout按照layout_weight定义的比例获得屏幕高度分配。</li>
+  <li>第一个子LinearLayout中每个View设置了“android:layout_width=”0dp””和“android:layout_weight=”1””两个属性，也就是在屏幕宽度范围内，按照ayout_weight定义的比例为每个View分配宽度。</li>
+  <li>第二个子LinearLayout中每个View设置了“android:layout_height=”0dp””和“android:layout_weight=”2””两个属性，也就是说在自己的屏幕高度范围内，按照layout_weight定义的比例为每个View分配高度。</li>
+  <li>
+    <p>效果图如下：</p>
+  </li>
+  <li><img src="/images/linearlayout.png" alt="" /></li>
+</ul>
+
+<h4 id="relativelayout---androidlayoutbelowandroidlayouttorightofdemo">RelativeLayout - 相对布局，控件可以根据之前定义控件的位置采相对地确定自己的位置。下面的例子展示了使用android:layout_below和android:layout_toRightOf定义控件相对位置的demo。</h4>
+
+<div class="highlight"><pre><code class="xml"><span class="nt">&lt;RelativeLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+    <span class="na">xmlns:tools=</span><span class="s">&quot;http://schemas.android.com/tools&quot;</span>
+    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">tools:context=</span><span class="s">&quot;.RelativeLayoutActivity&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;View</span>
+        <span class="na">android:id=</span><span class="s">&quot;@+id/v1_View&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;200dp&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+        <span class="na">android:background=</span><span class="s">&quot;#aa0000&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;View</span>
+        <span class="na">android:id=</span><span class="s">&quot;@+id/v2_View&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+        <span class="na">android:background=</span><span class="s">&quot;#00aa00&quot;</span>
+        <span class="na">android:layout_toRightOf=</span><span class="s">&quot;@id/v1_View&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;View</span>
+        <span class="na">android:id=</span><span class="s">&quot;@+id/v3_View&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+        <span class="na">android:background=</span><span class="s">&quot;#0000aa&quot;</span>
+        <span class="na">android:layout_below=</span><span class="s">&quot;@id/v1_View&quot;</span>  <span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/RelativeLayout&gt;</span></code></pre></div>
+
+<ul>
+  <li>layout_below属性定义了该控件在那个控件的下面。</li>
+  <li>layout_toRightOf属性定义了该控件在那个控件的右边。</li>
+  <li>
+    <p>效果图如下：</p>
+  </li>
+  <li><img src="/images/relativelayout.png" alt="" /></li>
+</ul>
+
+<h4 id="tablelayout---">TableLayout - 表格布局，使用表格的形式组织和展示控件。下面的例子展示了一个简单的表格形式。</h4>
+
+<div class="highlight"><pre><code class="xml"><span class="nt">&lt;TableLayout</span>
+    <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+    <span class="na">xmlns:tools=</span><span class="s">&quot;http://schemas.android.com/tools&quot;</span>
+    <span class="na">android:layout_width=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">android:layout_height=</span><span class="s">&quot;match_parent&quot;</span>
+    <span class="na">android:stretchColumns=</span><span class="s">&quot;1&quot;</span>
+    <span class="na">tools:context=</span><span class="s">&quot;.TableLayoutActivity&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;TableRow&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;200dp&quot;</span>
+            <span class="na">android:background=</span><span class="s">&quot;#aa0000&quot;</span>
+            <span class="nt">/&gt;</span>
+        <span class="nt">&lt;TextView</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+            <span class="na">android:text=</span><span class="s">&quot;#aa0000&quot;</span>
+            <span class="na">android:gravity=</span><span class="s">&quot;center&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/TableRow&gt;</span>
+    <span class="nt">&lt;View</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;2dip&quot;</span>
+        <span class="na">android:background=</span><span class="s">&quot;#000000&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;TableRow&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;200dp&quot;</span>
+            <span class="na">android:background=</span><span class="s">&quot;#00aa00&quot;</span>
+            <span class="nt">/&gt;</span>
+        <span class="nt">&lt;TextView</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+            <span class="na">android:text=</span><span class="s">&quot;#00aa00&quot;</span>
+            <span class="na">android:gravity=</span><span class="s">&quot;center&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/TableRow&gt;</span>
+    <span class="nt">&lt;View</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;2dip&quot;</span>
+        <span class="na">android:background=</span><span class="s">&quot;#000000&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;TableRow&gt;</span>
+        <span class="nt">&lt;View</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+            <span class="na">android:layout_width=</span><span class="s">&quot;200dp&quot;</span>
+            <span class="na">android:background=</span><span class="s">&quot;#0000aa&quot;</span>
+            <span class="nt">/&gt;</span>
+        <span class="nt">&lt;TextView</span>
+            <span class="na">android:layout_height=</span><span class="s">&quot;100dp&quot;</span>
+            <span class="na">android:text=</span><span class="s">&quot;#0000aa&quot;</span>
+            <span class="na">android:gravity=</span><span class="s">&quot;center&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/TableRow&gt;</span>
+<span class="nt">&lt;/TableLayout&gt;</span></code></pre></div>
+
+<ul>
+  <li>定义了三行，每行有两个控件，各行之间有一个分割View</li>
+  <li>
+    <p>效果图如下：</p>
+  </li>
+  <li><img src="/images/tablelayout.png" alt="" /></li>
+</ul>
+
+<h4 id="framelayout---">FrameLayout - 单帧布局，申请一块空白区域，控件可以按照定义层次展示出来，下面的例子展示了如何在应用使用单帧布局。</h4>
+
+<div class="highlight"><pre><code class="xml"><span class="nt">&lt;FrameLayout</span> <span class="na">xmlns:android=</span><span class="s">&quot;http://schemas.android.com/apk/res/android&quot;</span>
+    <span class="na">xmlns:tools=</span><span class="s">&quot;http://schemas.android.com/tools&quot;</span>
+    <span class="na">android:orientation=</span><span class="s">&quot;vertical&quot;</span>
+    <span class="na">android:layout_width=</span><span class="s">&quot;fill_parent&quot;</span>
+    <span class="na">android:layout_height=</span><span class="s">&quot;fill_parent&quot;</span>
+    <span class="na">android:background=</span><span class="s">&quot;#000000&quot;</span>
+    <span class="na">tools:context=</span><span class="s">&quot;.FrameLayoutActivity&quot;</span><span class="nt">&gt;</span>
+    &gt;
+    <span class="nt">&lt;ImageView</span>
+        <span class="na">android:id=</span><span class="s">&quot;@+id/one_imageview&quot;</span>
+        <span class="na">android:src=</span><span class="s">&quot;@drawable/ic_action_search&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:layout_gravity=</span><span class="s">&quot;right&quot;</span>
+        <span class="nt">/&gt;</span>
+    <span class="nt">&lt;ImageView</span>
+        <span class="na">android:id=</span><span class="s">&quot;@+id/two_imageview&quot;</span>
+        <span class="na">android:src=</span><span class="s">&quot;@drawable/ic_action_favorite&quot;</span>
+        <span class="na">android:layout_width=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:layout_height=</span><span class="s">&quot;wrap_content&quot;</span>
+        <span class="na">android:layout_gravity=</span><span class="s">&quot;left&quot;</span>
+        <span class="nt">/&gt;</span>
+<span class="nt">&lt;/FrameLayout&gt;</span></code></pre></div>
+
+<ul>
+  <li>在屏幕的左边和右边分别定义了一个图片View，以层叠方式显示。</li>
+  <li>
+    <p>效果图如下：</p>
+  </li>
+  <li><img src="/images/framelayout.png" alt="" /></li>
+</ul>
+
+<h4 id="localizationcompatibility">为了熟悉和理解这些布局模式，最好的办法是了解他们之间的区别之后，写个应用来巩固一下。完整的应用工程可以从<a href="https://github.com/xhrwang/AndroidLayoutDemo">这里下载</a>，在这个工程中，也应用到了本系列第2篇博文中讨论的localization和compatibility方面的支持。</h4>
+
+
+
+    <p class="meta"> -- EOF -- </p>
+
+    <ul class="pager">
+      
+      <li class="next"><a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持&rarr;</a></li>
+      
+
+      
+      <li class="previous"><a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探">&larr; 安卓开发学习笔记4-Android应用四大组件初探</a></li>
+      
+    </ul>
+
+    <div class="span8">
+      <p>声明: 本文采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/" target="_blank" rel="nofollow" title="署名-非商业性使用-相同方式共享">BY-NC-SA</a> 协议进行授权. 转载请注明转自: <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="nofollow">安卓开发学习笔记3-Android应用开发中的布局</a></p>
+    </div>
+
+
+  </div>
+
+
+  <div class="span4 sidebar">
+    
+    <h4 class="date">发布日期：<span>04 July 2014</span></h4>
+    
+    <!-- <p class="meta">By <a href="/about.html" class="author" title="author">Yukang</a><g:plusone size="small"></g:plusone></p> -->
+
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#Android-ref">Android <span>9</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+      <nav class="nav">
+        <ul>
+          <li><a href="/archive.html" >归档</a></li>
+          <li><a href="/tags.html">标签</a></li>
+          <li><a href="/links.html" >链接</a></li>
+          <li><a href="/about.html" >关于</a></li>
+          <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+        </ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+

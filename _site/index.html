@@ -1,0 +1,602 @@
+
+<!DOCTYPE html>
+<html>
+   <link rel="stylesheet" href="/assets/themes/twitter/bootstrap/css/bootstrap.min.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/style.css" />
+   <link rel="stylesheet" href="/assets/themes/twitter/css/pygments.css" />
+
+  <header>
+    <meta charset="utf-8">
+    
+    <title>Ross's Page</title>
+    
+
+    
+    <meta name="author" content="Ross">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+    <script type="text/javascript"
+	src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/images/favicon.ico">
+    <!-- Update these with your own images
+	 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+	 <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+	 <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+	 -->
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">Ross's Page</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">归档</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">标签</a></li>
+      	
+      
+    
+  
+
+
+
+
+            <li class="divider-vertical"></li>
+            
+            
+            
+
+
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/about.html">About</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/links.html">更多</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+
+
+
+
+
+            <li><a href="/atom.xml">订阅</a></li>
+          </ul>
+
+          <span class="pull-right slogan">  </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+   <body>
+    <div class="container">
+      <div class="content">
+        
+
+
+<div class="row post">
+  <div class="span8">
+    <h1 class="title"><a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现">委托和事件的C++实现</a> </h1>
+
+    <h3 id="section">委托和事件</h3>
+
+<h4 id="clambda">C#语言中的委托和事件使用非常方便，随着语言的进化，后来加入了匿名方法，lambda表达式以及泛型委托，给程序设计提供了很大的灵活性和可读性。</h4>
+
+<h4 id="cmvcviewcontrollerviewqtsignalsslotsconnectqtmeta-object-compilercc">C++中提供了函数指针和成员方法指针，没有委托和事件。在程序设计中，特别是界面应用程序开发中，我们通常会用到MVC模式，将界面部分独立出来成为View模块，在Controller模块中通过回调函数的方式对View中的控件状态进行更新。但是由于缺少对委托和事件的直接支持，设计的时候不容易很清晰得进行模块间解耦。有些界面框架比如Qt，引入了信号与槽机制，其实是以拓展语言的方式加入了委托和事件。而正是由于拓展了语言（signals和slots关键字，还有connect的时候用到的对应的宏），Qt实现了一个预编译器meta object compiler，在使用C++编译器编译之前，对代码进行预编译，自动生成标准C++支持的代码。</h4>
+
+<h4 id="qtfastdelegateccc">Qt，FastDelegate等开源框架给C++带来了对委托和事件的支持，对于我们开发者来说，理解它们的机制并能正确运用是一方面，理解如何自己使用C++实现委托和事件是另一方面，对我们熟悉C++本身，使用模板编程都有意义。</h4>
+
+<h4 id="c">在C++中实现委托，需要用到函数指针和模板类以及模板方法，我们先从函数指针开始，并在后面的代码示例中解释模板类和模板函数的使用方式和必要性。</h4>
+
+<h3 id="section-1">函数指针</h3>
+
+<div class="highlight"><pre><code class="c--"><span class="k">typedef</span> <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">pFunction</span><span class="p">)(</span><span class="kt">int</span><span class="p">,</span><span class="kt">char</span><span class="p">)</span><span class="o">=</span><span class="nb">NULL</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="kt">int</span> <span class="p">(</span><span class="n">SampleClass</span><span class="o">::*</span><span class="n">pMemberFunction</span><span class="p">)(</span><span class="kt">int</span><span class="p">,</span><span class="kt">char</span><span class="p">)</span><span class="o">=</span><span class="nb">NULL</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="kt">int</span> <span class="p">(</span><span class="n">SampleClass</span><span class="o">::*</span><span class="n">pConstMemberFunction</span><span class="p">)(</span><span class="kt">int</span><span class="p">,</span><span class="kt">char</span><span class="p">)</span> <span class="k">const</span><span class="o">=</span><span class="nb">NULL</span><span class="p">;</span></code></pre></div>
+
+<ol>
+  <li>上面定义了三个函数指针，返回值都为int类型，都有两个参数，依次为int和char类型。为了可读性，我们嫁了typedef关键字。</li>
+  <li>第一行定义了一个一般的函数指针。</li>
+  <li>第二行定义了一个非const的成员方法指针。</li>
+  <li>第三行定义了一个const的成员方法指针。</li>
+</ol>
+
+<h4 id="section-2">关于函数指针的赋值和调用，在下面的例子中会演示和解释。</h4>
+
+<h3 id="c-1">C++实现委托和事件</h3>
+
+<h4 id="democactiont1-t2">还是通过一个demo来练习一下，这里，我们实现一个类似于C#中的泛型委托Action&lt;T1, T2&gt;的委托。</h4>
+
+<ul>
+  <li>定义基类</li>
+</ul>
+
+<div class="highlight"><pre><code class="c--"><span class="c1">//Define a template class, the 2 typenames are the types of the parameters for the delegate function</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T2</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">ActionBase</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+    <span class="k">virtual</span> <span class="o">~</span><span class="n">ActionBase</span><span class="p">(){}</span>
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">eq</span><span class="p">(</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="p">)</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="nf">eq</span><span class="p">(</span> <span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">){</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;}</span>
+<span class="p">};</span></code></pre></div>
+
+<ol>
+  <li>重载操作符()，在其实现中调用回调函数，并传入T1，T2类型的参数。</li>
+  <li>eq方法用来对函数指针进行相等比较，在后面的事件类型中，我们会维护一个包含ActionBase类型指针的vector，保存对该事件绑定的委托对象。</li>
+</ol>
+
+<ul>
+  <li>定义一个ActionBase的派生类，该类型使用成员方法指针。</li>
+</ul>
+
+<div class="highlight"><pre><code class="c--"><span class="c1">//Action4MemberMethod is using a member method pointer</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">TMemberMethodProvider</span><span class="p">,</span><span class="k">typename</span> <span class="n">T1</span><span class="p">,</span><span class="k">typename</span> <span class="n">T2</span><span class="o">&gt;</span>
+<span class="k">class</span>  <span class="nc">Action4MemberMethod</span> <span class="o">:</span> <span class="k">public</span> <span class="n">ActionBase</span><span class="o">&lt;</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="nl">private:</span>
+    <span class="c1">//A member method pointer using the generic parameters.</span>
+    <span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="n">TMemberMethodProvider</span><span class="o">::*</span><span class="n">pFun</span><span class="p">)(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">);</span>
+    <span class="n">TMemberMethodProvider</span><span class="o">*</span>    <span class="n">pCLS</span><span class="p">;</span>
+    <span class="n">pFun</span>    <span class="n">pf</span><span class="p">;</span>
+
+<span class="nl">public:</span>
+    <span class="n">Action4MemberMethod</span><span class="p">(</span><span class="n">TMemberMethodProvider</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span> <span class="n">pFun</span> <span class="n">pf</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">pCLS</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+        <span class="k">this</span><span class="o">-&gt;</span><span class="n">pf</span> <span class="o">=</span> <span class="n">pf</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="n">T1</span> <span class="n">t1</span><span class="p">,</span> <span class="n">T2</span> <span class="n">t2</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// Note how to call a function via a function pointer</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">pCLS</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">pCLS</span><span class="o">-&gt;*</span><span class="n">pf</span><span class="p">)(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">//Determine whether current member method pointer is the same as the given one or not</span>
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">eq</span> <span class="p">(</span> <span class="n">TMemberMethodProvider</span><span class="o">*</span> <span class="n">ps</span><span class="p">,</span> <span class="n">pFun</span> <span class="n">pf</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">eq</span> <span class="p">(</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">ps</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pf</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">eq</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">ul</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pf</span> <span class="o">==</span> <span class="n">ul</span> <span class="o">&amp;&amp;</span> <span class="n">p</span> <span class="o">==</span> <span class="n">pCLS</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">eq</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre></div>
+
+<ul>
+  <li>定义另一个ActionBase的派生类，使用一般函数指针。</li>
+</ul>
+
+<div class="highlight"><pre><code class="c--"><span class="c1">//Action4RegularFunction is using a regular function pointer</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T1</span><span class="p">,</span><span class="k">typename</span> <span class="n">T2</span><span class="o">&gt;</span>
+<span class="k">class</span>  <span class="nc">Action4RegularFunction</span> <span class="o">:</span> <span class="k">public</span> <span class="n">ActionBase</span><span class="o">&lt;</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="o">&gt;</span>
+<span class="p">{</span>
+<span class="nl">private:</span>
+    <span class="k">typedef</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">pFun</span><span class="p">)(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">);</span>
+    <span class="n">pFun</span> <span class="n">pf</span><span class="p">;</span>
+
+<span class="nl">public:</span>
+    <span class="n">Action4RegularFunction</span><span class="p">(</span>  <span class="n">pFun</span> <span class="n">p</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="o">-&gt;</span><span class="n">pf</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">virtual</span> <span class="kt">void</span> <span class="k">operator</span><span class="p">()(</span><span class="n">T1</span> <span class="n">t1</span><span class="p">,</span> <span class="n">T2</span> <span class="n">t2</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// Note how to call a function via a function pointer</span>
+        <span class="k">this</span><span class="o">-&gt;</span><span class="n">pf</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">//Determine whether the current function pointer is the same as the given one or not</span>
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">eq</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">ul</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="k">this</span><span class="o">-&gt;</span><span class="n">pf</span><span class="p">)</span> <span class="o">==</span> <span class="n">ul</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">virtual</span> <span class="kt">bool</span> <span class="n">eq</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">ul</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre></div>
+
+<ul>
+  <li>定义一个事件类</li>
+</ul>
+
+<div class="highlight"><pre><code class="c--"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T1</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T2</span><span class="o">&gt;</span>
+<span class="k">class</span> <span class="nc">EventHandler</span>
+<span class="p">{</span>
+<span class="nl">private:</span>
+    <span class="k">typedef</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">ActionBase</span><span class="o">&lt;</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="o">&gt;*&gt;</span> <span class="n">vFBase</span><span class="p">;</span>
+    <span class="k">typedef</span> <span class="k">typename</span> <span class="n">vFBase</span><span class="o">::</span><span class="n">iterator</span>   <span class="n">vFBaseI</span><span class="p">;</span>
+    <span class="n">vFBase</span>  <span class="n">vF</span><span class="p">;</span>
+
+<span class="nl">public:</span>
+    <span class="n">EventHandler</span><span class="p">()</span>
+    <span class="p">{</span>
+    <span class="p">}</span>
+
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">CLS</span><span class="o">&gt;</span>
+    <span class="kt">void</span> <span class="n">bind</span><span class="p">(</span> <span class="n">CLS</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="n">CLS</span><span class="o">::*</span><span class="n">pFun</span><span class="p">)(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">ActionBase</span><span class="o">&lt;</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="o">&gt;*</span> <span class="n">pf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Action4MemberMethod</span><span class="o">&lt;</span><span class="n">CLS</span><span class="p">,</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">pFun</span><span class="p">);</span>
+        <span class="n">vF</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">pf</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Bind function %d to this event</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pFun</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Now there are %d functions binded to this event</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">vF</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">bind</span><span class="p">(</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">pFun</span><span class="p">)(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">)</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">ActionBase</span><span class="o">&lt;</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="o">&gt;*</span> <span class="n">pf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Action4RegularFunction</span><span class="o">&lt;</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">pFun</span><span class="p">);</span>
+        <span class="n">vF</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">pf</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Bind function %d to this event</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pFun</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Now there are %d functions binded to this event</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">vF</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+
+    <span class="p">}</span>
+
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">CLS</span><span class="o">&gt;</span>
+    <span class="kt">void</span> <span class="n">unbind</span><span class="p">(</span> <span class="n">CLS</span><span class="o">*</span> <span class="n">p</span><span class="p">,</span> <span class="kt">void</span> <span class="p">(</span><span class="n">CLS</span><span class="o">::*</span><span class="n">pFun</span><span class="p">)(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">vFBaseI</span> <span class="n">i</span> <span class="o">=</span> <span class="n">vF</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+        <span class="k">while</span> <span class="p">(</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">vF</span><span class="p">.</span><span class="n">end</span><span class="p">()</span> <span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">eq</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pFun</span><span class="p">))</span>
+            <span class="p">{</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Unbind function %d to this event</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pFun</span><span class="p">);</span>
+                <span class="k">delete</span> <span class="o">*</span><span class="n">i</span><span class="p">;</span>
+                <span class="n">vF</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Now there are %d functions binded to this event</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">vF</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="n">unbind</span><span class="p">(</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">pFun</span><span class="p">)(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">vFBaseI</span> <span class="n">i</span> <span class="o">=</span> <span class="n">vF</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+        <span class="k">while</span> <span class="p">(</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">vF</span><span class="p">.</span><span class="n">end</span><span class="p">()</span> <span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">eq</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pFun</span><span class="p">))</span>
+            <span class="p">{</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Unbind function %d to this event</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pFun</span><span class="p">);</span>
+                <span class="k">delete</span> <span class="o">*</span><span class="n">i</span><span class="p">;</span>
+                <span class="n">vF</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">i</span><span class="p">);</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Now there are %d functions binded to this event</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">vF</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">//Trigger the event, and execute the binded delegated functions one by one.</span>
+    <span class="kt">void</span> <span class="n">doEvent</span><span class="p">(</span><span class="n">T1</span> <span class="n">t1</span><span class="p">,</span> <span class="n">T2</span> <span class="n">t2</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">vF</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">printf</span><span class="p">(</span><span class="s">&quot;No function binded.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+            <span class="k">return</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">vFBaseI</span> <span class="n">i</span> <span class="o">=</span> <span class="n">vF</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span>
+        <span class="k">while</span><span class="p">(</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">vF</span><span class="p">.</span><span class="n">end</span><span class="p">()</span> <span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Executing binded function.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+            <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">))(</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">);</span>
+            <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;All binded functions executed!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span></code></pre></div>
+
+<ol>
+  <li>bind方法用于将委托对象绑定到该事件，通过将指向ActionBase的派生类对象的指针保存如ActionBase*类型的vector实现。</li>
+  <li>unbind方法用于将已经绑定的委托对象移除，这里用到了委托对象的eq方法，通过比较函数指针的内存地址确定移除哪一个委托对象。</li>
+  <li>doEvent会触发事件，并依次执行绑定到该事件的委托对象中函数指针指向的方法。</li>
+</ol>
+
+<ul>
+  <li>好了，测试一下：</li>
+</ul>
+
+<div class="highlight"><pre><code class="c--"><span class="k">class</span> <span class="nc">Test</span>
+<span class="p">{</span>
+<span class="nl">public:</span>
+    <span class="kt">void</span> <span class="n">print</span><span class="p">(</span>  <span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">p</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;A member function in Test:</span><span class="se">\n</span><span class="s">========Paras: %d, %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span><span class="n">p</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kt">void</span> <span class="nf">print</span><span class="p">(</span> <span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">p</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;A regular global function:</span><span class="se">\n</span><span class="s">========Paras: %d, %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span><span class="n">p</span> <span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">EventHandler</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">char</span><span class="o">*&gt;</span> <span class="n">event</span><span class="p">;</span>
+    <span class="n">Test</span> <span class="n">a</span><span class="p">;</span>
+    <span class="c1">// Bind 2 functions to the event</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Test</span><span class="o">::</span><span class="n">print</span><span class="p">);</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">print</span><span class="p">);</span>
+    <span class="c1">// Trigger the event</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">doEvent</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s">&quot;Fire an event with 10&quot;</span><span class="p">);</span>
+
+    <span class="c1">// Unbind all functions binded to the event</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">unbind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">Test</span><span class="o">::</span><span class="n">print</span><span class="p">);</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">unbind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">print</span> <span class="p">);</span>
+    <span class="c1">// Trigger the event again to see what will happen</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">doEvent</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="s">&quot;Fire an event with 11&quot;</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></div>
+
+<h4 id="section-3">运行后的输出为：</h4>
+
+<pre><code>Bind function 16258109 to this event
+Now there are 1 functions binded to this event
+Bind function 16258144 to this event
+Now there are 2 functions binded to this event
+Executing binded function.
+A member function in Test:
+========Paras: 10, Fire an event with 10
+Executing binded function.
+A regular global function:
+========Paras: 10, Fire an event with 10
+All binded functions executed!
+Unbind function 16258109 to this event
+Now there are 1 functions binded to this event
+Unbind function 16258144 to this event
+Now there are 0 functions binded to this event
+No function binded.
+</code></pre>
+
+<h3 id="section-4">后记</h3>
+
+<h4 id="cactiont1t2funcpredicateflavorvectorcboostfastdelegateqtqtmocc">这里我们只是实现了类似于C#中Action&lt;T1,T2&gt;的泛型委托，对于想Func，Predicate等，没有涉及到，而且只能接收两个参数，从中可以看到，语言特性的Flavor是不容易加入的，而且我们的代码也没有做线程安全的设计，对于事件类型中的vector的访问没有做线程同步。所以，这个例子只能帮助我们理解委托和事件的工作机制，如果需要完整的工程级别可用的C++实现，可以参考Boost和FastDelegate，Qt的信号与槽也可以，只是Qt涉及到moc预编译，不是纯粹C++语言开发层面的了。</h4>
+
+
+
+    <ul class="pager">
+      <li class="next"><a href="/archive.html" title="所有文章">查看所有文章 &rarr;</a></li>
+    </ul>
+
+    <!-- <div id="disqus_thread"> -->
+    <!--   <script type="text/javascript"> -->
+    <!-- 	var disqus_developer = 1; -->
+    <!-- 	/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */ -->
+    <!-- 	var disqus_shortname = 'yukang'; // required: replace example with your forum shortname -->
+
+    <!-- 	/* * * DON'T EDIT BELOW THIS LINE * * */ -->
+    <!-- 	(function() { -->
+    <!-- 	var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true; -->
+    <!-- 	dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js'; -->
+    <!-- 	(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq); -->
+    <!-- 	})(); -->
+    <!-- 	BYB.includeScript('/assets/themes/twitter/prettify/prettify.js',function(){prettyPrint()}); -->
+    <!--   </script> -->
+
+    <!--   <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a> -->
+    <!--   </noscript> -->
+    <!--   <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a> -->
+    <!-- </div> -->
+
+  </div>
+
+
+  <div class="span4 sidebar">
+
+    <h4 class="date">发布日期：<span>23 July 2014</span></h4>
+    
+    <h4>标签</h4>
+    <ul class="tag_box">
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#C++-ref">C++ <span>6</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">最近</h4>
+      <ul>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/23/delegate-and-event-in-cpp.html" title="委托和事件的C++实现" rel="bookmark">委托和事件的C++实现</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/15/android-development-study-note8.html" title="安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver" rel="bookmark">安卓开发学习笔记8-Android应用四大组件之Broadcast Receiver</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/13/qt-signals-and-slots.html" title="Qt中的信号与槽" rel="bookmark">Qt中的信号与槽</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/12/android-development-study-note7.html" title="安卓开发学习笔记7-Android应用四大组件之ContentProvider" rel="bookmark">安卓开发学习笔记7-Android应用四大组件之ContentProvider</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/07/android-development-study-note6.html" title="安卓开发学习笔记6-Android应用四大组件之Service" rel="bookmark">安卓开发学习笔记6-Android应用四大组件之Service</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note5.html" title="安卓开发学习笔记5-Android应用四大组件之Activity" rel="bookmark">安卓开发学习笔记5-Android应用四大组件之Activity</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/06/android-development-study-note4.html" title="安卓开发学习笔记4-Android应用四大组件初探" rel="bookmark">安卓开发学习笔记4-Android应用四大组件初探</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note3.html" title="安卓开发学习笔记3-Android应用开发中的布局" rel="bookmark">安卓开发学习笔记3-Android应用开发中的布局</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/04/android-development-study-note2.html" title="安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持" rel="bookmark">安卓开发学习笔记2-Android应用工程及其对localization，compatibility的支持</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/03/android-development-study-note1.html" title="安卓开发学习笔记1-Android系统架构和启动流程" rel="bookmark">安卓开发学习笔记1-Android系统架构和启动流程</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/use-template-to-gain-polymorphsm-in-compiling-time.html" title="模板基类与编译期多态" rel="bookmark">模板基类与编译期多态</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/07/01/class-design-in-python.html" title="Python中的类型设计" rel="bookmark">Python中的类型设计</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/29/use-ndk-standalone-toolchain-to-cross-compile-cc-project.html" title="使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台" rel="bookmark">使用Android NDK的交叉编译工具链移植C/C++项目到安卓平台</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/solve-fizzbuzz-question-in-python-way.html" title="FIZZBUZZ问题的Python解决方案" rel="bookmark">FIZZBUZZ问题的Python解决方案</a>
+        </li>
+        
+        <li class="v-aside-li">
+          <a href="/2014/06/18/build-openwrt-x86-vmware-virtual-disk-for-testing.html" title="编译部署 OpenWrt X86 VMWare 虚拟机" rel="bookmark">编译部署 OpenWrt X86 VMWare 虚拟机</a>
+        </li>
+        
+      </ul>
+    </div>
+
+    <div class="violet-aside-post">
+      <h4 class="v-section-tit">页面</h4>
+    <nav class="nav">
+      <ul>
+        <li><a href="/archive.html" >归档</a></li>
+        <li><a href="/tags.html">标签</a></li>
+        <li><a href="/links.html" >链接</a></li>
+        <li><a href="/about.html" >关于</a></li>
+        <li><a href="/atom.xml" target="_blank" >RSS</a></li>
+      </ul>
+    </nav>
+    </div>
+
+  </div>
+</div>
+
+
+      </div>
+
+      <footer>
+        <p>&copy; <a href="mailto:xhrwang@gmail.com">Xiaohui Wang</a> 2012.
+          Proudly powered by <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+
+      </footer>
+    </div> <!-- /container -->
+
+    
+  </body>
+
+</html>
+
